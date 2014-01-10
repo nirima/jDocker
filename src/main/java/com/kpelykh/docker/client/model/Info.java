@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
  * @author Konstantin Pelykh (kpelykh@gmail.com)
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Info {
 
     @JsonProperty("Debug")
@@ -22,7 +24,6 @@ public class Info {
 
     @JsonProperty("DriverStatus")
     private List<Object> driverStatuses;
-
 
     @JsonProperty("Images")
     private int    images;
@@ -50,6 +51,12 @@ public class Info {
 
     @JsonProperty("NGoroutines")
     private int    NGoroutines;
+
+    @JsonProperty("InitPath")
+    private String initPath;
+
+    @JsonProperty("InitSha1")
+    private String initSha1;
 
     public boolean isDebug() {
         return debug;
@@ -101,6 +108,14 @@ public class Info {
 
     public int getNGoroutines() {
         return NGoroutines;
+    }
+
+    public String getInitPath() {
+        return initPath;
+    }
+
+    public String getInitSha1() {
+        return initSha1;
     }
 
     @Override

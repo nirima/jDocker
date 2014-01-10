@@ -1,6 +1,9 @@
 package com.kpelykh.docker.client.model;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import java.util.Map;
 
 /**
  *
@@ -9,18 +12,39 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class HostConfig {
 
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("Binds")
     private String[] binds;
 
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("ContainerIDFile")
     private String containerIDFile;
 
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("LxcConf")
     private LxcConf[] lxcConf;
+
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+    @JsonProperty("PortBindings")   private Map<String, PortBinding[]> portBindings;
+
+
+    public HostConfig() {
+
+    }
 
     public HostConfig(String[] binds) {
         this.binds = binds;
     }
+
+    public Map<String, PortBinding[]> getPortBindings() {
+        return portBindings;
+    }
+
+    public void setPortBindings(Map<String, PortBinding[]> portBindings) {
+        this.portBindings = portBindings;
+    }
+
+
 
     public String[] getBinds() {
         return binds;

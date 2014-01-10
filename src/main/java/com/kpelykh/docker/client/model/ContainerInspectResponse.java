@@ -1,6 +1,7 @@
 package com.kpelykh.docker.client.model;
 
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Map;
  * @author Konstantin Pelykh (kpelykh@gmail.com)
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContainerInspectResponse {
 
     @JsonProperty("ID")
@@ -153,10 +155,13 @@ public class ContainerInspectResponse {
         @JsonProperty("IPPrefixLen") public int ipPrefixLen;
         @JsonProperty("Gateway") public String gateway;
         @JsonProperty("Bridge") public String bridge;
+
+        @JsonProperty("PortMapping") public String portMapping;
+
         // Deprecated - can we remove?
 //        @JsonProperty("PortMapping") public Map<String,Map<String, String>> portMapping;
         // FIXME Is this the right type? -BJE
-        @JsonProperty("Ports") public Map<String, String> ports;
+        @JsonProperty("Ports") public Map<String, PortBinding[]> ports;
 
         @Override
         public String toString() {

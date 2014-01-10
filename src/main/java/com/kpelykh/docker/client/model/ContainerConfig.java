@@ -38,8 +38,15 @@ public class ContainerConfig {
     // FIXME Is this the right type? -BJE
     @JsonProperty("ExposedPorts")   private Map<String, ?> exposedPorts;
 
+
+
+
     public Map<String, ?> getExposedPorts() {
         return exposedPorts;
+    }
+
+    public void setExposedPorts(Map<String, ?> exposedPorts) {
+        this.exposedPorts = exposedPorts;
     }
 
     public boolean isNetworkDisabled() {
@@ -222,30 +229,31 @@ public class ContainerConfig {
 
     @Override
     public String toString() {
-        return "ContainerConfig{" +
-                "hostName='" + hostName + '\'' +
-                ", portSpecs=" + Arrays.toString(portSpecs) +
-                ", user='" + user + '\'' +
-                ", tty=" + tty +
-                ", stdinOpen=" + stdinOpen +
-                ", stdInOnce=" + stdInOnce +
-                ", memoryLimit=" + memoryLimit +
-                ", memorySwap=" + memorySwap +
-                ", cpuShares=" + cpuShares +
-                ", attachStdin=" + attachStdin +
-                ", attachStdout=" + attachStdout +
-                ", attachStderr=" + attachStderr +
-                ", env=" + Arrays.toString(env) +
-                ", cmd=" + Arrays.toString(cmd) +
-                ", dns=" + Arrays.toString(dns) +
-                ", image='" + image + '\'' +
-                ", volumes=" + volumes +
-                ", volumesFrom='" + volumesFrom + '\'' +
-                ", entrypoint=" + Arrays.toString(entrypoint) +
-                ", networkDisabled=" + networkDisabled +
-                ", privileged=" + privileged +
-                ", workingDir='" + workingDir + '\'' +
-                ", domainName='" + domainName + '\'' +
-                '}';
+        return com.google.common.base.Objects.toStringHelper(this)
+                .add("hostName", hostName)
+                .add("portSpecs", portSpecs)
+                .add("user", user)
+                .add("tty", tty)
+                .add("stdinOpen", stdinOpen)
+                .add("stdInOnce", stdInOnce)
+                .add("memoryLimit", memoryLimit)
+                .add("memorySwap", memorySwap)
+                .add("cpuShares", cpuShares)
+                .add("attachStdin", attachStdin)
+                .add("attachStdout", attachStdout)
+                .add("attachStderr", attachStderr)
+                .add("env", env)
+                .add("cmd", cmd)
+                .add("dns", dns)
+                .add("image", image)
+                .add("volumes", volumes)
+                .add("volumesFrom", volumesFrom)
+                .add("entrypoint", entrypoint)
+                .add("networkDisabled", networkDisabled)
+                .add("privileged", privileged)
+                .add("workingDir", workingDir)
+                .add("domainName", domainName)
+                .add("exposedPorts", exposedPorts)
+                .toString();
     }
 }
