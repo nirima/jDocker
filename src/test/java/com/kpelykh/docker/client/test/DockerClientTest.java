@@ -661,7 +661,8 @@ public class DockerClientTest extends Assert
 
         assertThat(containerInspectResponse.getId(), notNullValue());
         assertThat(containerInspectResponse.getNetworkSettings().portMapping, notNullValue());
-        int port = Integer.valueOf(containerInspectResponse.getNetworkSettings().portMapping.get("Tcp").get("6900"));
+        int port = Integer.valueOf(containerInspectResponse.getNetworkSettings().portMapping);
+//        int port = Integer.valueOf(containerInspectResponse.getNetworkSettings().portMapping.get("Tcp").get("6900"));
 
 
         LOG.info("Checking port {} is open", port);

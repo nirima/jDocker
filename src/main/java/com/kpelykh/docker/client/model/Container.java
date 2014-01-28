@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -7,6 +8,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Konstantin Pelykh (kpelykh@gmail.com)
  *
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Container {
 
     @JsonProperty("Id")
@@ -24,8 +26,18 @@ public class Container {
     @JsonProperty("Status")
     private String status;
 
+    /* Example:
+       "Ports": {
+            "22/tcp": [
+                {
+                    "HostIp": "0.0.0.0",
+                    "HostPort": "8022"
+                }
+            ]
+        }
+     */
     @JsonProperty("Ports")
-    private String ports;   //Example value "49164->6900, 49165->7100"
+    private Ports ports;
 
     @JsonProperty("SizeRw")
     private int size;
@@ -53,7 +65,7 @@ public class Container {
         return status;
     }
 
-    public String getPorts() {
+    public Ports getPorts() {
         return ports;
     }
 
