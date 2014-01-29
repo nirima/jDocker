@@ -1,12 +1,14 @@
 package com.kpelykh.docker.client.model;
 
 import com.google.common.base.Objects;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * Created by magnayn on 09/01/2014.
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class PortBinding {
 
     @JsonProperty(value = "HostIp")
