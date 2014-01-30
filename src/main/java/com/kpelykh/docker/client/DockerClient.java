@@ -13,6 +13,7 @@ import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.client.apache4.ApacheHttpClient4;
 import com.sun.jersey.client.apache4.ApacheHttpClient4Handler;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
@@ -26,6 +27,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
@@ -111,6 +113,57 @@ public class DockerClient
      ** IMAGE API
      **
      **/
+
+    public void push(String name, @Nullable String registry) throws DockerException {
+        Preconditions.checkNotNull(name, "Name must be specified");
+
+        MultivaluedMap<String,String> params = new MultivaluedMapImpl();
+        if( registry != null )
+            params.add("registry", registry);
+
+        WebResource webResource = client.resource(restEndpointUrl + "/images/" + name + "/push").queryParams(params);
+        try {
+            LOGGER.trace("POST: " + webResource.toString());
+            webResource.accept(MediaType.APPLICATION_OCTET_STREAM_TYPE).post();
+        } catch (UniformInterfaceException exception) {
+            if (exception.getResponse().getStatus() == 500) {
+                throw new DockerException("Server error.", exception);
+            } else if (exception.getResponse().getStatus() == 404) {
+                LOGGER.warn(String.format("%s no such image", name));
+            }
+            else {
+                throw new DockerException(exception);
+            }
+        }
+    }
+
+    public void tag(String name, String repository, boolean force) throws DockerException {
+        Preconditions.checkNotNull(name, "Name must be specified");
+        Preconditions.checkNotNull(repository, "Repository must be specified");
+
+        MultivaluedMap<String,String> params = new MultivaluedMapImpl();
+        if( force  )
+            params.add("force", "1");
+
+        WebResource webResource = client.resource(restEndpointUrl + "/images/" + name + "/tag").queryParams(params);
+
+        try {
+            LOGGER.trace("POST: " + webResource.toString());
+            webResource.accept(MediaType.APPLICATION_OCTET_STREAM_TYPE).post();
+        } catch (UniformInterfaceException exception) {
+            if (exception.getResponse().getStatus() == 500) {
+                throw new DockerException("Server error.", exception);
+            } else if (exception.getResponse().getStatus() == 400) {
+                throw new DockerException("Bad Parameter");
+            } else if (exception.getResponse().getStatus() == 409) {
+                throw new DockerException("Conflict");
+            }
+            else {
+                throw new DockerException(exception);
+            }
+        }
+    }
+
 
     public ClientResponse pull(String repository) throws DockerException {
         return this.pull(repository, null, null);
