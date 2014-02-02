@@ -64,7 +64,7 @@ public class CommitConfig {
         this.run = b.run;
     }
 
-    public static class Builder implements IBuilder<CommitConfig> {
+    public static final class Builder {
         private String container;
         private String repo;
         private String tag;
