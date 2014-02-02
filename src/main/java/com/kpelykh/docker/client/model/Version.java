@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -35,11 +36,10 @@ public class Version {
 
     @Override
     public String toString() {
-        return "Version{" +
-                "version='" + version + '\'' +
-                ", gitCommit='" + gitCommit + '\'' +
-                ", goVersion='" + goVersion + '\'' +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("version", version)
+                .add("gitCommit", gitCommit)
+                .add("goVersion", goVersion)
+                .toString();
     }
-
 }

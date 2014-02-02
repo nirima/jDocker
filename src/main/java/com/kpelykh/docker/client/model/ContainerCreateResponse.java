@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -29,9 +30,9 @@ public class ContainerCreateResponse {
 
     @Override
     public String toString() {
-        return "ContainerCreateResponse{" +
-                "id='" + id + '\'' +
-                ", warnings=" + Arrays.toString(warnings) +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("id", id)
+                .add("warnings", warnings)
+                .toString();
     }
 }

@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -55,14 +56,13 @@ public class Image {
 
     @Override
     public String toString() {
-        return "Image{" +
-                "repository='" + repository + '\'' +
-                ", tag='" + tag + '\'' +
-                ", id='" + id + '\'' +
-                ", created=" + created +
-                ", size=" + size +
-                ", virtualSize=" + virtualSize +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("repository", repository)
+                .add("tag", tag)
+                .add("id", id)
+                .add("created", created)
+                .add("size", size)
+                .add("virtualSize", virtualSize)
+                .toString();
     }
-
 }

@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -80,18 +81,18 @@ public class ImageInspectResponse {
 
     @Override
     public String toString() {
-        return "ImageInspectResponse{" +
-                "id='" + id + '\'' +
-                ", parent='" + parent + '\'' +
-                ", created='" + created + '\'' +
-                ", container='" + container + '\'' +
-                ", containerConfig=" + containerConfig +
-                ", size=" + size +
-                ", dockerVersion='" + dockerVersion + '\'' +
-                ", config=" + config +
-                ", arch='" + arch + '\'' +
-                ", comment='" + comment + '\'' +
-                ", author='" + author + '\'' +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("id", id)
+                .add("parent", parent)
+                .add("created", created)
+                .add("container", container)
+                .add("containerConfig", containerConfig)
+                .add("size", size)
+                .add("dockerVersion", dockerVersion)
+                .add("config", config)
+                .add("arch", arch)
+                .add("comment", comment)
+                .add("author", author)
+                .toString();
     }
 }

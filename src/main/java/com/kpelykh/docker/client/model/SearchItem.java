@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -48,7 +49,12 @@ public class SearchItem {
 
     @Override
     public String toString() {
-        return  "name='" + name + '\'' +
-                ", description='" + description + '\'' + '}';
+        return Objects.toStringHelper(this)
+                .add("starCount", starCount)
+                .add("isOfficial", isOfficial)
+                .add("isTrusted", isTrusted)
+                .add("name", name)
+                .add("description", description)
+                .toString();
     }
 }

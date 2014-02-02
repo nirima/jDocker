@@ -1,6 +1,7 @@
 package com.kpelykh.docker.client.model;
 
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -186,14 +187,14 @@ public class ContainerInspectResponse {
 
         @Override
         public String toString() {
-            return "ContainerState{" +
-                    "running=" + running +
-                    ", pid=" + pid +
-                    ", exitCode=" + exitCode +
-                    ", startedAt='" + startedAt + '\'' +
-                    ", ghost=" + ghost +
-                    ", finishedAt='" + finishedAt + '\'' +
-                    '}';
+            return Objects.toStringHelper(this)
+                    .add("running", running)
+                    .add("pid", pid)
+                    .add("exitCode", exitCode)
+                    .add("startedAt", startedAt)
+                    .add("ghost", ghost)
+                    .add("finishedAt", finishedAt)
+                    .toString();
         }
     }
 

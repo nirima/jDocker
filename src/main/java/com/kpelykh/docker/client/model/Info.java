@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -120,18 +121,22 @@ public class Info {
 
     @Override
     public String toString() {
-        return "Info{" +
-                "debug=" + debug +
-                ", containers=" + containers +
-                ", images=" + images +
-                ", NFd=" + NFd +
-                ", NGoroutines=" + NGoroutines +
-                ", memoryLimit=" + memoryLimit +
-                ", lxcVersion='" + lxcVersion + '\'' +
-                ", nEventListener=" + nEventListener +
-                ", kernelVersion='" + kernelVersion + '\'' +
-                ", IPv4Forwarding='" + IPv4Forwarding + '\'' +
-                ", IndexServerAddress='" + IndexServerAddress + '\'' +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("debug", debug)
+                .add("containers", containers)
+                .add("driver", driver)
+                .add("driverStatuses", driverStatuses)
+                .add("images", images)
+                .add("IPv4Forwarding", IPv4Forwarding)
+                .add("IndexServerAddress", IndexServerAddress)
+                .add("kernelVersion", kernelVersion)
+                .add("lxcVersion", lxcVersion)
+                .add("memoryLimit", memoryLimit)
+                .add("nEventListener", nEventListener)
+                .add("NFd", NFd)
+                .add("NGoroutines", NGoroutines)
+                .add("initPath", initPath)
+                .add("initSha1", initSha1)
+                .toString();
     }
 }

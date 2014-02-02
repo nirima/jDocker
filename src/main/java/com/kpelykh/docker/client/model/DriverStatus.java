@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -25,9 +26,9 @@ public class DriverStatus {
 
     @Override
     public String toString() {
-        return "DriverStatus{" +
-                "rootDir='" + rootDir + '\'' +
-                ", dirs=" + dirs +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("rootDir", rootDir)
+                .add("dirs", dirs)
+                .toString();
     }
 }

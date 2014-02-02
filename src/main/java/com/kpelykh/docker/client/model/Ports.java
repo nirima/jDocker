@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonProcessingException;
@@ -60,10 +61,10 @@ public class Ports {
 
         @Override
         public String toString() {
-            return "Port{" +
-                    "scheme='" + scheme + '\'' +
-                    ", port='" + port + '\'' +
-                    '}';
+            return Objects.toStringHelper(this)
+                    .add("scheme", scheme)
+                    .add("port", port)
+                    .toString();
         }
     }
 

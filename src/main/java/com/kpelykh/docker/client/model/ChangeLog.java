@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -27,9 +28,9 @@ public class ChangeLog {
 
     @Override
     public String toString() {
-        return "ChangeLog{" +
-                "path='" + path + '\'' +
-                ", kind=" + kind +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("path", path)
+                .add("kind", kind)
+                .toString();
     }
 }

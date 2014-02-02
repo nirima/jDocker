@@ -1,5 +1,6 @@
 package com.kpelykh.docker.client.model;
 
+import com.google.common.base.Objects;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -79,15 +80,15 @@ public class Container {
 
     @Override
     public String toString() {
-        return "Container{" +
-                "id='" + id + '\'' +
-                ", command='" + command + '\'' +
-                ", image='" + image + '\'' +
-                ", created=" + created +
-                ", status='" + status + '\'' +
-                ", ports=" + ports +
-                ", size=" + size +
-                ", sizeRootFs=" + sizeRootFs +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("id", id)
+                .add("command", command)
+                .add("image", image)
+                .add("created", created)
+                .add("status", status)
+                .add("ports", ports)
+                .add("size", size)
+                .add("sizeRootFs", sizeRootFs)
+                .toString();
     }
 }
