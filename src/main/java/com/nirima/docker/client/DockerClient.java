@@ -64,7 +64,9 @@ public class DockerClient {
         this.serverUrl = serverUrl;
 
         ClientConfig cc = new ClientConfig();
-        cc.register(new LoggingFilter());
+        LoggingFilter lf = new LoggingFilter(java.util.logging.Logger.getLogger(LoggingFilter.class.getName()), true);
+
+        cc.register(lf);
         this.webTarget = ClientBuilder.newClient(cc).target(serverUrl);
 
     }
@@ -395,8 +397,8 @@ public class DockerClient {
             return new ContainerFinder();
         }
 
-        public ContainerCreateResponse createContainer(ContainerConfig containerConfig) {
-            return containersApi().createContainer(containerConfig);
+        public ContainerCreateResponse create(ContainerConfig containerConfig) {
+            return containersApi().createContainer(null, containerConfig);
         }
     }
 

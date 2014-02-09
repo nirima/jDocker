@@ -40,7 +40,8 @@ public interface ContainersClient {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/create")
-    ContainerCreateResponse createContainer(ContainerConfig config);
+    ContainerCreateResponse createContainer(@QueryParam("name")String name,
+                                            ContainerConfig config);
 
 /*
 
