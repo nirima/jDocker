@@ -1,10 +1,10 @@
 package com.kpelykh.docker.client.test;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.*;
+import com.nirima.docker.client.DockerException;
+import com.nirima.docker.client.model.*;
 
-import com.sun.jersey.api.client.ClientResponse;
+
+import com.nirima.docker.client.DockerClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang.StringUtils;
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static ch.lambdaj.Lambda.filter;
@@ -30,9 +31,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.testinfected.hamcrest.jpa.HasFieldWithValue.hasField;
 
 /**
- * Unit test for DockerClient.
- * @author Konstantin Pelykh (kpelykh@gmail.com)
- */
+* Unit test for DockerClient.
+* @author Konstantin Pelykh (kpelykh@gmail.com)
+*/
 public class DockerClientTest extends Assert
 {
     public static final Logger LOG = LoggerFactory.getLogger(DockerClientTest.class);
@@ -42,14 +43,21 @@ public class DockerClientTest extends Assert
     private List<String> tmpImgs = new ArrayList<String>();
     private List<String> tmpContainers = new ArrayList<String>();
 
+    public static final String DOCKER_HOST = "http://172.16.0.16:4243";
+
+
     @BeforeTest
-    public void beforeTest() throws DockerException {
+    public void beforeTest() throws DockerException, IOException {
         LOG.info("======================= BEFORETEST =======================");
-        LOG.info("Connecting to Docker server at http://localhost:4243");
-        dockerClient = new DockerClient("http://172.16.2.150:7979");
+        LOG.info("Connecting to Docker server at " + DOCKER_HOST);
+        dockerClient = DockerClient.builder().withUrl(DOCKER_HOST).build();
         LOG.info("Creating image 'busybox'");
 
-        dockerClient.pull("busybox");
+        InputStream inputStream = dockerClient.createPullCommand()
+                    .image("busybox")
+                    .execute();
+
+        System.out.println(IOUtils.toString(inputStream));
 
         assertNotNull(dockerClient);
         LOG.info("======================= END OF BEFORETEST =======================\n\n");
@@ -70,15 +78,15 @@ public class DockerClientTest extends Assert
         for (String image : tmpImgs) {
             LOG.info("Cleaning up temporary image " + image);
             try {
-                dockerClient.removeImage(image);
-            } catch (DockerException ignore) {}
+                dockerClient.imagesApi().removeImage(image);
+            } catch (Exception ignore) {}
         }
 
         for (String container : tmpContainers) {
             LOG.info("Cleaning up temporary container " + container);
             try {
-                dockerClient.removeContainer(container);
-            } catch (DockerException ignore) {}
+                dockerClient.container(container).remove();
+            } catch (Exception ignore) {}
         }
         LOG.info(String.format("################################## END OF %s ##################################\n", result.getName()));
     }
@@ -91,7 +99,7 @@ public class DockerClientTest extends Assert
 
     @Test
     public void testDockerVersion() throws DockerException {
-        Version version = dockerClient.version();
+        Version version = dockerClient.miscApi().version();
         LOG.info(version.toString());
 
         assertTrue(version.getGoVersion().length() > 0);
@@ -103,7 +111,7 @@ public class DockerClientTest extends Assert
 
     @Test
     public void testDockerInfo() throws DockerException {
-        Info dockerInfo = dockerClient.info();
+        Info dockerInfo = dockerClient.miscApi().info();
         LOG.info(dockerInfo.toString());
 
         assertTrue(dockerInfo.toString().contains("containers"));
@@ -119,7 +127,7 @@ public class DockerClientTest extends Assert
 
     @Test
     public void testDockerSearch() throws DockerException {
-        List<SearchItem> dockerSearch = dockerClient.search("busybox");
+        List<SearchItem> dockerSearch = dockerClient.images().search("busybox");
         LOG.info("Search returned" + dockerSearch.toString());
 
         Matcher matcher = hasItem(hasField("name", equalTo("busybox")));
@@ -137,10 +145,11 @@ public class DockerClientTest extends Assert
 
     @Test
     public void testImages() throws DockerException {
-        List<Image> images = dockerClient.getImages(false);
+        //List<Image> images = dockerClient.getImages(false);
+        List<Image> images = dockerClient.images().finder().allImages(false).list();
         assertThat(images, notNullValue());
         LOG.info("Images List: " + images);
-        Info info = dockerClient.info();
+        Info info = dockerClient.system().info();
 
         //assertThat(images.size(), equalTo(info.images));
 
@@ -156,7 +165,10 @@ public class DockerClientTest extends Assert
 
     @Test
     public void testListContainers() throws DockerException {
-        List<Container> containers = dockerClient.listContainers(true);
+        List<Container> containers = dockerClient.containers()
+                                                 .finder()
+                                                    .allContainers(true)
+                                                    .list();
         assertThat(containers, notNullValue());
         LOG.info("Container List: " + containers);
 
@@ -166,12 +178,15 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[]{"echo"});
 
-        ContainerCreateResponse container1 = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container1 = dockerClient.containers().createContainer(containerConfig);
         assertThat(container1.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container1.getId());
+        dockerClient.container(container1.getId()).start();
         tmpContainers.add(container1.getId());
 
-        List containers2 = dockerClient.listContainers(true);
+        List containers2 = dockerClient.containers()
+                .finder()
+                .allContainers(true)
+                .list();
         assertThat(size + 1, is(equalTo(containers2.size())));
         Matcher matcher = hasItem(hasField("id", startsWith(container1.getId())));
         assertThat(containers2, matcher);
@@ -198,7 +213,7 @@ public class DockerClientTest extends Assert
         containerConfig.setCmd(new String[]{"true"});
 
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
 
         LOG.info("Created container " + container.toString());
 
@@ -214,14 +229,14 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[]{"true"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
         boolean add = tmpContainers.add(container.getId());
 
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start();
 
-        ContainerInspectResponse containerInspectResponse = dockerClient.inspectContainer(container.getId());
+        ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
         LOG.info("Container Inspect: " + containerInspectResponse.toString());
 
         assertThat(containerInspectResponse.config, is(notNullValue()));
@@ -247,19 +262,19 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[]{"true"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
         tmpContainers.add(container.getId());
 
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start();
 
-        int exitCode = dockerClient.waitContainer(container.getId());
+        int exitCode = dockerClient.container(container.getId()).waitForContainer();
         LOG.info("Container exit code: " + exitCode);
 
         assertThat(exitCode, equalTo(0));
 
-        ContainerInspectResponse containerInspectResponse = dockerClient.inspectContainer(container.getId());
+        ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
         LOG.info("Container Inspect: " + containerInspectResponse.toString());
 
         assertThat(containerInspectResponse.getState().running, is(equalTo(false)));
@@ -276,30 +291,30 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"/bin/echo", snippet});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
 
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start();
         tmpContainers.add(container.getId());
 
-        int exitCode = dockerClient.waitContainer(container.getId());
+        int exitCode = dockerClient.container(container.getId()).waitForContainer();
 
         assertThat(exitCode, equalTo(0));
 
-        ClientResponse response = dockerClient.logContainer(container.getId());
+        InputStream response = dockerClient.container(container.getId()).log();
 
         StringWriter logwriter = new StringWriter();
 
         try {
-            LineIterator itr = IOUtils.lineIterator(response.getEntityInputStream(), "UTF-8");
+            LineIterator itr = IOUtils.lineIterator(response, "UTF-8");
             while (itr.hasNext()) {
                 String line = itr.next();
                 logwriter.write(line + (itr.hasNext() ? "\n" : ""));
                 LOG.info(line);
             }
         } finally {
-            IOUtils.closeQuietly(response.getEntityInputStream());
+            IOUtils.closeQuietly(response);
         }
 
         String fullLog = logwriter.toString();
@@ -314,15 +329,15 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"touch", "/test"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start();
         boolean add = tmpContainers.add(container.getId());
-        int exitCode = dockerClient.waitContainer(container.getId());
+        int exitCode = dockerClient.container(container.getId()).waitForContainer();
         assertThat(exitCode, equalTo(0));
 
-        List filesystemDiff = dockerClient.containterDiff(container.getId());
+        List filesystemDiff = dockerClient.container(container.getId()).getFilesystemChanges();
         LOG.info("Container DIFF: " + filesystemDiff.toString());
 
         assertThat(filesystemDiff.size(), equalTo(4));
@@ -339,16 +354,16 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"sleep", "9999"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start();
         tmpContainers.add(container.getId());
 
         LOG.info("Stopping container " + container.getId());
-        dockerClient.stopContainer(container.getId(), 2);
+        dockerClient.container(container.getId()).stop(2);
 
-        ContainerInspectResponse containerInspectResponse = dockerClient.inspectContainer(container.getId());
+        ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
         LOG.info("Container Inspect:" + containerInspectResponse.toString());
 
         assertThat(containerInspectResponse.getState().running, is(equalTo(false)));
@@ -362,16 +377,16 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"sleep", "9999"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start(); 
         tmpContainers.add(container.getId());
 
         LOG.info("Killing container " + container.getId());
-        dockerClient.kill(container.getId());
+        dockerClient.container(container.getId()).kill();
 
-        ContainerInspectResponse containerInspectResponse = dockerClient.inspectContainer(container.getId());
+        ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
         LOG.info("Container Inspect:" + containerInspectResponse.toString());
 
         assertThat(containerInspectResponse.getState().running, is(equalTo(false)));
@@ -386,20 +401,20 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"sleep", "9999"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start(); 
         tmpContainers.add(container.getId());
 
-        ContainerInspectResponse containerInspectResponse = dockerClient.inspectContainer(container.getId());
+        ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
         LOG.info("Container Inspect:" + containerInspectResponse.toString());
 
         String startTime = containerInspectResponse.getState().startedAt;
 
-        dockerClient.restart(container.getId(), 2);
+        dockerClient.container(container.getId()).restart(2);
 
-        ContainerInspectResponse containerInspectResponse2 = dockerClient.inspectContainer(container.getId());
+        ContainerInspectResponse containerInspectResponse2 = dockerClient.container(container.getId()).inspect();
         LOG.info("Container Inspect After Restart:" + containerInspectResponse2.toString());
 
         String startTime2 = containerInspectResponse2.getState().startedAt;
@@ -408,7 +423,7 @@ public class DockerClientTest extends Assert
 
         assertThat(containerInspectResponse.getState().running, is(equalTo(true)));
 
-        dockerClient.kill(container.getId());
+        dockerClient.container(container.getId()).kill();
     }
 
     @Test
@@ -418,16 +433,16 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"true"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
 
-        dockerClient.startContainer(container.getId());
-        dockerClient.waitContainer(container.getId());
+        dockerClient.container(container.getId()).start(); 
+        dockerClient.container(container.getId()).waitForContainer();
         tmpContainers.add(container.getId());
 
         LOG.info("Removing container " + container.getId());
-        dockerClient.removeContainer(container.getId());
+        dockerClient.container(container.getId()).remove();
 
-        List containers2 = dockerClient.listContainers(true);
+        List containers2 = dockerClient.containers().finder().allContainers(true).list();
         Matcher matcher = not(hasItem(hasField("id", startsWith(container.getId()))));
         assertThat(containers2, matcher);
 
@@ -445,28 +460,28 @@ public class DockerClientTest extends Assert
         String testImage = "joffrey/test001";
 
         LOG.info("Removing image " + testImage);
-        dockerClient.removeImage(testImage);
+        dockerClient.image(testImage).remove();
 
-        Info info = dockerClient.info();
+        Info info = dockerClient.system().info();
         LOG.info("Client info " + info.toString());
 
         int imgCount= info.getImages();
 
         LOG.info("Pulling image " + testImage);
 
-        ClientResponse response = dockerClient.pull(testImage);
+        InputStream response = dockerClient.createPullCommand().image(testImage).execute();
 
         StringWriter logwriter = new StringWriter();
 
         try {
-            LineIterator itr = IOUtils.lineIterator(response.getEntityInputStream(), "UTF-8");
+            LineIterator itr = IOUtils.lineIterator(response, "UTF-8");
             while (itr.hasNext()) {
                 String line = itr.next();
                 logwriter.write(line + "\n");
                 LOG.info(line);
             }
         } finally {
-            IOUtils.closeQuietly(response.getEntityInputStream());
+            IOUtils.closeQuietly(response);
         }
 
         String fullLog = logwriter.toString();
@@ -474,12 +489,12 @@ public class DockerClientTest extends Assert
 
         tmpImgs.add(testImage);
 
-        info = dockerClient.info();
+        info = dockerClient.system().info();
         LOG.info("Client info after pull " + info.toString());
 
         assertThat(imgCount + 2, equalTo(info.getImages()));
 
-        ImageInspectResponse imageInspectResponse = dockerClient.inspectImage(testImage);
+        ImageInspectResponse imageInspectResponse = dockerClient.image(testImage).inspect();
         LOG.info("Image Inspect: " + imageInspectResponse.toString());
         assertThat(imageInspectResponse, notNullValue());
     }
@@ -492,23 +507,23 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"touch", "/test"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start();
         tmpContainers.add(container.getId());
 
         LOG.info("Commiting container " + container.toString());
-        String imageId = dockerClient.commit(new CommitConfig.Builder(container.getId()).build());
+        String imageId = dockerClient.container(container.getId()).commit(new CommitConfig.Builder(container.getId()).build());
         tmpImgs.add(imageId);
 
-        ImageInspectResponse imageInspectResponse = dockerClient.inspectImage(imageId);
+        ImageInspectResponse imageInspectResponse = dockerClient.image(imageId).inspect();
         LOG.info("Image Inspect: " + imageInspectResponse.toString());
 
         assertThat(imageInspectResponse, hasField("container", startsWith(container.getId())));
         assertThat(imageInspectResponse.getContainerConfig().getImage(), equalTo("busybox"));
 
-        ImageInspectResponse busyboxImg = dockerClient.inspectImage("busybox");
+        ImageInspectResponse busyboxImg = dockerClient.image("busybox").inspect();
 
         assertThat(imageInspectResponse.getParent(), equalTo(busyboxImg.getId()));
     }
@@ -521,21 +536,23 @@ public class DockerClientTest extends Assert
         containerConfig.setImage("busybox");
         containerConfig.setCmd(new String[] {"touch", "/test"});
 
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start();
         tmpContainers.add(container.getId());
 
 
         LOG.info("Commiting container " + container.toString());
-        String imageId = dockerClient.commit(new CommitConfig.Builder(container.getId()).build());
+        String imageId = dockerClient.container(container.getId()).commit(new CommitConfig.Builder(container.getId()).build());
         tmpImgs.add(imageId);
 
         LOG.info("Removing image" + imageId);
-        dockerClient.removeImage(imageId);
+        dockerClient.image(imageId).remove();
 
-        List containers = dockerClient.listContainers(true);
+        List containers = dockerClient.containers()
+                                      .finder().allContainers(true).list();
+        
         Matcher matcher = not(hasItem(hasField("id", startsWith(imageId))));
         assertThat(containers, matcher);
     }
@@ -568,10 +585,10 @@ public class DockerClientTest extends Assert
             containerConfig.setImage("busybox");
             containerConfig.setCmd( commands );
 
-            ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
-            dockerClient.startContainer(container.getId());
+            ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
+            dockerClient.container(container.getId()).start(); 
             tmpContainers.add(container.getId());
-            int exitcode = dockerClient.waitContainer(container.getId());
+            int exitcode = dockerClient.container(container.getId()).waitForContainer();
             assertThat(exitcode, equalTo(0));
         }
     }
@@ -581,27 +598,20 @@ public class DockerClientTest extends Assert
     public void testNgixDockerfileBuilder() throws DockerException, IOException {
         File baseDir = new File(Thread.currentThread().getContextClassLoader().getResource("nginx").getFile());
 
-        ClientResponse response = dockerClient.build(baseDir);
+        Collection<EventStreamItem> response = dockerClient.system().build(baseDir, null);
 
-        StringWriter logwriter = new StringWriter();
-
-        try {
-            LineIterator itr = IOUtils.lineIterator(response.getEntityInputStream(), "UTF-8");
-            while (itr.hasNext()) {
-                String line = itr.next();
-                logwriter.write(line + "\n");
-                LOG.info(line);
+        boolean success = false;
+        String imageId = null;
+        for(EventStreamItem item : response ) {
+            if( item.getStream().contains("Successfully built")) {
+                success = true;
+                imageId = StringUtils.substringAfterLast(item.getStream(), "Successfully built ").trim();
             }
-        } finally {
-            IOUtils.closeQuietly(response.getEntityInputStream());
         }
 
-        String fullLog = logwriter.toString();
-        assertThat(fullLog, containsString("Successfully built"));
+        assertThat(success, equalTo(true));
 
-        String imageId = StringUtils.substringAfterLast(fullLog, "Successfully built ").trim();
-
-        ImageInspectResponse imageInspectResponse = dockerClient.inspectImage(imageId);
+        ImageInspectResponse imageInspectResponse = dockerClient.image(imageId).inspect();
         assertThat(imageInspectResponse, not(nullValue()));
         LOG.info("Image Inspect:" + imageInspectResponse.toString());
         tmpImgs.add(imageInspectResponse.getId());
@@ -625,50 +635,43 @@ public class DockerClientTest extends Assert
     public void testNetCatDockerfileBuilder() throws DockerException, IOException, InterruptedException {
         File baseDir = new File(Thread.currentThread().getContextClassLoader().getResource("netcat").getFile());
 
-        ClientResponse response = dockerClient.build(baseDir);
+        Collection<EventStreamItem> response = dockerClient.system().build(baseDir, null);
 
-        StringWriter logwriter = new StringWriter();
-
-        try {
-            LineIterator itr = IOUtils.lineIterator(response.getEntityInputStream(), "UTF-8");
-            while (itr.hasNext()) {
-                String line = itr.next();
-                logwriter.write(line + "\n");
-                LOG.info(line);
+        boolean success = false;
+        String imageId = null;
+        for(EventStreamItem item : response ) {
+            if( item.getStream().contains("Successfully built")) {
+                success = true;
+                imageId = StringUtils.substringAfterLast(item.getStream(), "Successfully built ").trim();
             }
-        } finally {
-            IOUtils.closeQuietly(response.getEntityInputStream());
         }
 
-        String fullLog = logwriter.toString();
-        assertThat(fullLog, containsString("Successfully built"));
+        assertThat(success, equalTo(true));
 
-        String imageId = StringUtils.substringAfterLast(fullLog, "Successfully built ").trim();
-
-        ImageInspectResponse imageInspectResponse = dockerClient.inspectImage(imageId);
+        ImageInspectResponse imageInspectResponse = dockerClient.image(imageId).inspect();
         assertThat(imageInspectResponse, not(nullValue()));
         LOG.info("Image Inspect:" + imageInspectResponse.toString());
         tmpImgs.add(imageInspectResponse.getId());
 
         ContainerConfig containerConfig = new ContainerConfig();
         containerConfig.setImage(imageInspectResponse.getId());
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.startContainer(container.getId());
+        dockerClient.container(container.getId()).start(); 
         tmpContainers.add(container.getId());
 
-        ContainerInspectResponse containerInspectResponse = dockerClient.inspectContainer(container.getId());
+        ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
 
         assertThat(containerInspectResponse.getId(), notNullValue());
         assertThat(containerInspectResponse.getNetworkSettings().portMapping, notNullValue());
         int port = Integer.valueOf(containerInspectResponse.getNetworkSettings().portMapping);
-//        int port = Integer.valueOf(containerInspectResponse.getNetworkSettings().portMapping.get("Tcp").get("6900"));
+//        int port = Integer.valueOf(containerInspectResponse.getNetworkSettings().portMapping.list("Tcp").list("6900"));
 
 
         LOG.info("Checking port {} is open", port);
         assertThat(available(port), is(false));
 
-        dockerClient.stopContainer(container.getId(), 0);
+        dockerClient.container(container.getId()).stop(0);
 
         LOG.info("Checking port {} is closed", port);
         assertThat(available(port), is(true));
@@ -717,52 +720,45 @@ public class DockerClientTest extends Assert
     private void dockerfileBuild(File baseDir, String expectedText) throws DockerException, IOException {
 
         //Build image
-        ClientResponse response = dockerClient.build(baseDir);
+        Collection<EventStreamItem> response = dockerClient.system().build(baseDir, null);
 
-        StringWriter logwriter = new StringWriter();
-
-        try {
-            LineIterator itr = IOUtils.lineIterator(response.getEntityInputStream(), "UTF-8");
-            while (itr.hasNext()) {
-                String line = itr.next();
-                logwriter.write(line + "\n");
-                LOG.info(line);
+        boolean success = false;
+        String imageId = null;
+        for(EventStreamItem item : response ) {
+            if( item.getStream().contains("Successfully built")) {
+                success = true;
+                imageId = StringUtils.substringAfterLast(item.getStream(), "Successfully built ").trim();
             }
-        } finally {
-            IOUtils.closeQuietly(response.getEntityInputStream());
         }
 
-        String fullLog = logwriter.toString();
-        assertThat(fullLog, containsString("Successfully built"));
-
-        String imageId = StringUtils.substringAfterLast(fullLog, "Successfully built ").trim();
+        assertThat(success, equalTo(true));
 
         //Create container based on image
         ContainerConfig containerConfig = new ContainerConfig();
         containerConfig.setImage(imageId);
-        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+        ContainerCreateResponse container = dockerClient.containers().createContainer(containerConfig);
         LOG.info("Created container " + container.toString());
         assertThat(container.getId(), not(isEmptyString()));
 
-        dockerClient.startContainer(container.getId());
-        dockerClient.waitContainer(container.getId());
+        dockerClient.container(container.getId()).start(); 
+        dockerClient.container(container.getId()).waitForContainer();
 
         tmpContainers.add(container.getId());
 
         //Log container
-        ClientResponse logResponse = dockerClient.logContainer(container.getId());
+        InputStream logResponse = dockerClient.container(container.getId()).log();
 
         StringWriter logwriter2 = new StringWriter();
 
         try {
-            LineIterator itr = IOUtils.lineIterator(logResponse.getEntityInputStream(), "UTF-8");
+            LineIterator itr = IOUtils.lineIterator(logResponse, "UTF-8");
             while (itr.hasNext()) {
                 String line = itr.next();
                 logwriter2.write(line + (itr.hasNext() ? "\n" : ""));
                 LOG.info(line);
             }
         } finally {
-            IOUtils.closeQuietly(logResponse.getEntityInputStream());
+            IOUtils.closeQuietly(logResponse);
         }
 
         assertThat(logwriter2.toString(), equalTo(expectedText));

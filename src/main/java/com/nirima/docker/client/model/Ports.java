@@ -1,14 +1,16 @@
-package com.kpelykh.docker.client.model;
+package com.nirima.docker.client.model;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Objects;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.ObjectCodec;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -74,13 +76,14 @@ public class Ports {
             Ports out = new Ports();
             ObjectCodec oc = jsonParser.getCodec();
             JsonNode node = oc.readTree(jsonParser);
-            for (Iterator<String> it = node.getFieldNames(); it.hasNext();) {
+            for (Iterator<String> it = node.fieldNames(); it.hasNext();) {
                 String pname = it.next();
                 out.addPort(Port.makePort(pname));
 
             }
             return out;
         }
+
     }
 
 }

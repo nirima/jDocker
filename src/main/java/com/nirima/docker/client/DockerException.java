@@ -1,4 +1,4 @@
-package com.kpelykh.docker.client;
+package com.nirima.docker.client;
 
 /**
  *

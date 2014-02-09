@@ -8,14 +8,14 @@
         <version>7</version>
     </parent>
 
-    <groupId>com.kpelykh</groupId>
-    <artifactId>docker-java</artifactId>
+    <groupId>com.nirima.jdocker</groupId>
+    <artifactId>jDocker</artifactId>
     <packaging>jar</packaging>
-    <version>0.6.1-nm-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
 
-    <name>docker-java</name>
-    <url>https://github.com/kpelykh/docker-java</url>
-    <description>Java API Client for Docker</description>
+    <name>jDocker</name>
+    <url>https://github.com/nirima/jDocker</url>
+    <description>Java Fluent API Client for Docker</description>
 
     <licenses>
         <license>
@@ -26,9 +26,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:magnayn/docker-java.git</connection>
-        <url>scm:git:git@github.com:magnayn/docker-java.git</url>
-        <developerConnection>scm:git:git@github.com:magnayn/docker-java.git</developerConnection>
+        <connection>scm:git:git@github.com:nirima/jDocker.git</connection>
+        <url>scm:git:git@github.com:nirima/jDocker.git</url>
+        <developerConnection>scm:git:git@github.com:nirima/jDocker.git</developerConnection>
     </scm>
 
     <developers>
@@ -36,6 +36,11 @@
             <id>kpelykh</id>
             <name>Konstantin Pelykh</name>
             <email>kpelykh@gmail.com</email>
+        </developer>
+        <developer>
+            <id>magnayn</id>
+            <name>Nigel Magnay</name>
+            <email>nigel.magnay@gmail.com</email>
         </developer>
     </developers>
 
@@ -48,8 +53,9 @@
 
         <version.slf4j>1.7.5</version.slf4j>
 
-        <jersey.version>1.17.1</jersey.version>
-        <jersey-apache-client4.version>1.9</jersey-apache-client4.version>
+        <jersey.version>2.5.1</jersey.version>
+        <!--<jersey-apache-client4.version>1.9</jersey-apache-client4.version>-->
+        <jackson.version>1.9.13</jackson.version>
 
         <httpclient.version>4.2.5</httpclient.version>
         <commons-compress.version>1.5</commons-compress.version>
@@ -76,31 +82,61 @@
     </properties>
 
     <dependencies>
+
         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-core</artifactId>
-            <version>${jersey.version}</version>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <type>jar</type>
         </dependency>
+
         <dependency>
-            <groupId>com.sun.jersey</groupId>
+            <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
             <version>${jersey.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
             <version>${jersey.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.jersey.contribs</groupId>
-            <artifactId>jersey-multipart</artifactId>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-proxy-client</artifactId>
             <version>${jersey.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.jersey.contribs</groupId>
-            <artifactId>jersey-apache-client4</artifactId>
-            <version>${jersey-apache-client4.version}</version>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${jersey.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>2.2.3</version>
+        </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.glassfish.jersey</groupId>-->
+            <!--<artifactId>jersey-client</artifactId>-->
+            <!--<version>${jersey.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.glassfish.jersey</groupId>-->
+            <!--<artifactId>jersey-json</artifactId>-->
+            <!--<version>${jersey.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.glassfish.jersey.contribs</groupId>-->
+            <!--<artifactId>jersey-multipart</artifactId>-->
+            <!--<version>${jersey.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.sun.jersey.contribs</groupId>-->
+            <!--<artifactId>jersey-apache-client4</artifactId>-->
+            <!--<version>${jersey-apache-client4.version}</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

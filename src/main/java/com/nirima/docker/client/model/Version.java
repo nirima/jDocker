@@ -1,8 +1,8 @@
-package com.kpelykh.docker.client.model;
+package com.nirima.docker.client.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Objects;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *
@@ -12,7 +12,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Version {
 
-
     @JsonProperty("Version")
     private String version;
 
@@ -21,6 +20,7 @@ public class Version {
 
     @JsonProperty("GoVersion")
     private String  goVersion;
+
 
     public String getVersion() {
         return version;

@@ -1,11 +1,10 @@
-package com.kpelykh.docker.client.model;
+package com.nirima.docker.client.model;
 
 
 import com.google.common.base.Objects;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -130,26 +129,27 @@ public class ContainerInspectResponse {
 
     @Override
     public String toString() {
-        return "ContainerInspectResponse{" +
-                "id='" + id + '\'' +
-                ", created='" + created + '\'' +
-                ", path='" + path + '\'' +
-                ", args=" + Arrays.toString(args) +
-                ", config=" + config +
-                ", state=" + state +
-                ", image='" + image + '\'' +
-                ", networkSettings=" + networkSettings +
-                ", sysInitPath='" + sysInitPath + '\'' +
-                ", resolvConfPath='" + resolvConfPath + '\'' +
-                ", volumes=" + volumes +
-                ", volumesRW=" + volumesRW +
-                ", hostnamePath='" + hostnamePath + '\'' +
-                ", hostsPath='" + hostsPath + '\'' +
-                ", name='" + name + '\'' +
-                ", driver='" + driver + '\'' +
-                '}';
+        return Objects.toStringHelper(this)
+                .add("id", id)
+                .add("created", created)
+                .add("path", path)
+                .add("args", args)
+                .add("config", config)
+                .add("state", state)
+                .add("image", image)
+                .add("networkSettings", networkSettings)
+                .add("sysInitPath", sysInitPath)
+                .add("resolvConfPath", resolvConfPath)
+                .add("volumes", volumes)
+                .add("volumesRW", volumesRW)
+                .add("hostnamePath", hostnamePath)
+                .add("hostsPath", hostsPath)
+                .add("name", name)
+                .add("driver", driver)
+                .toString();
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public class NetworkSettings {
 
         @JsonProperty("IPAddress") public String ipAddress;
@@ -176,6 +176,7 @@ public class ContainerInspectResponse {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public class ContainerState {
 
         @JsonProperty("Running") public boolean running;
