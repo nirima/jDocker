@@ -1,5 +1,6 @@
 package com.nirima.docker.client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.base.Preconditions;
@@ -227,6 +228,8 @@ public class DockerClient {
         return new PullCommandBuilder();
     }
 
+
+
     // Container functions-----------------------------------------------------
     public class Container {
         private final String containerId;
@@ -285,14 +288,55 @@ public class DockerClient {
             return containersApi().inspectContainer(containerId);
         }
 
-        public String commit(CommitConfig commitConfig) {
-
-            return miscApi().commit(containerId, commitConfig.getMessage(),commitConfig.getRepo(),commitConfig.getTag(),commitConfig.getAuthor(), commitConfig.getRun()).getId();
+        public CommitCommandBuilder createCommitCommand() {
+            return new CommitCommandBuilder();
         }
 
         public InputStream log() {
             return containersApi().attachToContainer(containerId,true,false,false,true,true);
         }
+
+
+        public final class CommitCommandBuilder {
+            private String repo;
+            private String tag;
+            private String message;
+            private String author;
+            private String run;
+
+            private CommitCommandBuilder() {
+            }
+
+            public CommitCommandBuilder repo(String repo) {
+                this.repo = repo;
+                return this;
+            }
+
+            public CommitCommandBuilder tag(String tag) {
+                this.tag = tag;
+                return this;
+            }
+
+            public CommitCommandBuilder message(String message) {
+                this.message = message;
+                return this;
+            }
+
+            public CommitCommandBuilder author(String author) {
+                this.author = author;
+                return this;
+            }
+
+            public CommitCommandBuilder run(String run) {
+                this.run = run;
+                return this;
+            }
+
+            public String execute() {
+                return miscApi().commit(containerId, message,repo,tag,author, run).getId();
+            }
+        }
+
     }
 
     public class ContainerFinder
@@ -304,6 +348,11 @@ public class DockerClient {
         private String since;
         private String before;
 
+        /**
+         * Show all containers (including ones that have finished : I.E: docker list -a
+         * @param allContainers
+         * @return
+         */
         public ContainerFinder allContainers(boolean allContainers) {
             this.allContainers = allContainers;
             return this;
@@ -425,23 +474,5 @@ public class DockerClient {
         return new Image(imageId);
     }
 
-    // -------------------------------------------------------------------------------------------------
-//    public static void main(String parm[]) {
-//
-//
-//        DockerClient docker = DockerClient.builder()
-//                .withUrl("http://172.16.0.16:4243")
-//                .build();
-//
-//
-//
-//        System.out.println(docker.miscApi().info());
-//
-//        System.out.println(docker.miscApi().version());
-//
-//        //System.out.println(docker.containersApi().listContainers());
-//
-//        //docker.containersApi().stopContainer("asfasdfasdf");
-//       System.out.println(docker.miscApi().events(1374067924L));
-//    }
+
 }

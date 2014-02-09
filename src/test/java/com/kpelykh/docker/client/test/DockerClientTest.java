@@ -514,7 +514,8 @@ public class DockerClientTest extends Assert
         tmpContainers.add(container.getId());
 
         LOG.info("Commiting container " + container.toString());
-        String imageId = dockerClient.container(container.getId()).commit(new CommitConfig.Builder(container.getId()).build());
+        String imageId = dockerClient.container(container.getId()).createCommitCommand()
+                                                                  .execute();
         tmpImgs.add(imageId);
 
         ImageInspectResponse imageInspectResponse = dockerClient.image(imageId).inspect();
@@ -544,7 +545,9 @@ public class DockerClientTest extends Assert
 
 
         LOG.info("Commiting container " + container.toString());
-        String imageId = dockerClient.container(container.getId()).commit(new CommitConfig.Builder(container.getId()).build());
+        String imageId = dockerClient.container(container.getId()).createCommitCommand()
+                                                                  .execute();
+
         tmpImgs.add(imageId);
 
         LOG.info("Removing image" + imageId);
