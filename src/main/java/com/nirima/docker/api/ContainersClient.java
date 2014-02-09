@@ -265,7 +265,7 @@ Status Codes:
     @Path("/{id}/start")
     @Produces(MediaType.TEXT_PLAIN)
     String startContainer(@PathParam("id") String id,
-                          @Nullable HostConfig hostConfig);
+                          HostConfig hostConfig);
 
 /*
 Stop a container
