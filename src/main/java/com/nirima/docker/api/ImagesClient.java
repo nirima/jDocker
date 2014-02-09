@@ -236,32 +236,15 @@ Status Codes:
     void pushImageOnRegistry(@PathParam("name")     String name,
                              @QueryParam("registry")String registry);
 
-    /*
-
-Tag an image into a repository
-
-POST /images/(name)/tag
-Tag the image name into a repository
-
-Example request:
-
-POST /images/test/tag?repo=myrepo&force=0 HTTP/1.1
-Example response:
-
-HTTP/1.1 200 OK
-Query Parameters:
-
-repo – The repository to tag in
-force – 1/True/true or 0/False/false, default false
-Status Codes:
-200 – no error
-400 – bad parameter
-404 – no such image
-409 – conflict
-500 – server error
-*/
 
     //------------------------
+
+    /**
+     * Tag an image into a repository
+     * @param name
+     * @param repository – The repository to tag in
+     * @param force
+     */
     @POST
     @Path("/{name}/tag")
     void tagImage(@PathParam("name")   String name,

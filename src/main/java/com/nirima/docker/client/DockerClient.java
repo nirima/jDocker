@@ -465,6 +465,14 @@ public class DockerClient {
         public ImageInspectResponse inspect() {
             return imagesApi().inspectImage(imageId);
         }
+
+        public void tag(String name, boolean b) {
+            imagesApi().tagImage(imageId, name, b);
+        }
+
+        public void push(String registry) {
+            imagesApi().pushImageOnRegistry(imageId, registry);
+        }
     }
 
     public Images images() { return new Images(); }
