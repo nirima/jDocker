@@ -367,7 +367,7 @@
 //    }
 //
 //
-//    public ContainerCreateResponse createContainer(ContainerConfig config) throws DockerException {
+//    public ContainerCreateResponse create(ContainerConfig config) throws DockerException {
 //
 //        WebResource webResource = client.resource(restEndpointUrl + "/containers/create");
 //

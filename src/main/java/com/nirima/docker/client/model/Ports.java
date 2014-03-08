@@ -38,6 +38,14 @@ public class Ports {
 //        p.addMapping(target);
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("ports", ports)
+                .add("mapping", mapping)
+                .toString();
+    }
+
     public static class Port{
         private final String scheme;
         private final String port;

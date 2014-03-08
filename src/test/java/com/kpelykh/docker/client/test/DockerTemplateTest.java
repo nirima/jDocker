@@ -34,7 +34,7 @@
 //        System.out.println(containerConfig);
 //
 //
-//        ContainerCreateResponse container = dockerClient.createContainer(containerConfig);
+//        ContainerCreateResponse container = dockerClient.create(containerConfig);
 //
 //
 //        Map<String, PortBinding[]> bports = new HashMap<String, PortBinding[]>();
