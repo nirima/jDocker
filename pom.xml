@@ -11,7 +11,7 @@
     <groupId>com.nirima.jdocker</groupId>
     <artifactId>jDocker</artifactId>
     <packaging>jar</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
 
     <name>jDocker</name>
     <url>https://github.com/nirima/jDocker</url>
