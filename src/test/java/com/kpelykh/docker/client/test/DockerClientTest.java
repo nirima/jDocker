@@ -31,9 +31,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.testinfected.hamcrest.jpa.HasFieldWithValue.hasField;
 
 /**
-* Unit test for DockerClient.
-* @author Konstantin Pelykh (kpelykh@gmail.com)
-*/
+ * Unit test for DockerClient.
+ * @author Konstantin Pelykh (kpelykh@gmail.com)
+ */
 public class DockerClientTest extends Assert
 {
     public static final Logger LOG = LoggerFactory.getLogger(DockerClientTest.class);
@@ -43,14 +43,12 @@ public class DockerClientTest extends Assert
     private List<String> tmpImgs = new ArrayList<String>();
     private List<String> tmpContainers = new ArrayList<String>();
 
-    public static final String DOCKER_HOST = "http://172.16.0.16:4243";
-
-
     @BeforeTest
     public void beforeTest() throws DockerException, IOException {
+		String url = System.getProperty("docker.url", "http://172.16.0.16:4243");
         LOG.info("======================= BEFORETEST =======================");
-        LOG.info("Connecting to Docker server at " + DOCKER_HOST);
-        dockerClient = DockerClient.builder().withUrl(DOCKER_HOST).build();
+        LOG.info("Connecting to Docker server at " + url);
+        dockerClient = DockerClient.builder().withUrl(url).build();
         LOG.info("Creating image 'busybox'");
 
         InputStream inputStream = dockerClient.createPullCommand()
