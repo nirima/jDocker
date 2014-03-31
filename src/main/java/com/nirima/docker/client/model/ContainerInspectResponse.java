@@ -156,23 +156,19 @@ public class ContainerInspectResponse {
         @JsonProperty("IPPrefixLen") public int ipPrefixLen;
         @JsonProperty("Gateway") public String gateway;
         @JsonProperty("Bridge") public String bridge;
-
         @JsonProperty("PortMapping") public String portMapping;
-
-        // Deprecated - can we remove?
-//        @JsonProperty("PortMapping") public Map<String,Map<String, String>> portMapping;
-        // FIXME Is this the right type? -BJE
-        @JsonProperty("Ports") public Map<String, PortBinding[]> ports;
+        @JsonProperty("Ports") public Ports ports;
 
         @Override
         public String toString() {
-            return "NetworkSettings{" +
-                    "ipAddress='" + ipAddress + '\'' +
-                    ", ipPrefixLen=" + ipPrefixLen +
-                    ", gateway='" + gateway + '\'' +
-                    ", bridge='" + bridge + '\'' +
-                    ", ports=" + ports +
-                    '}';
+            return Objects.toStringHelper(this)
+                    .add("ipAddress", ipAddress)
+                    .add("ipPrefixLen", ipPrefixLen)
+                    .add("gateway", gateway)
+                    .add("bridge", bridge)
+                    .add("portMapping", portMapping)
+                    .add("ports", ports)
+                    .toString();
         }
     }
 

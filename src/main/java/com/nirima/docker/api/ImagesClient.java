@@ -65,7 +65,7 @@ Status Codes:
 
     @POST
     @Path("/create")
-    InputStream createImage(@QueryParam("image") String fromImage,
+    InputStream createImage(@QueryParam("fromImage") String fromImage,
                      @QueryParam("fromSrc")   String fromSrc,
                      @QueryParam("repo")      String repo,
                      @QueryParam("tag")       String tag,

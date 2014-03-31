@@ -217,11 +217,11 @@ public class DockerClient {
         }
 
         public InputStream execute() {
-            if( tag == null )
+         /*   if( tag == null )
                 tag = "";
             if( registry == null )
                 registry = "";
-
+           */
             return imagesApi().createImage(fromImage, fromSrc, repo, tag, registry);
         }
     }
@@ -294,8 +294,11 @@ public class DockerClient {
             return new CommitCommandBuilder();
         }
 
-        public InputStream log() {
-            return containersApi().attachToContainer(containerId,true,false,false,true,true);
+        public InputStream log() throws IOException {
+            InputStream inputStream = containersApi().attachToContainer(containerId,true,false,false,true,true);
+            // Skip the header.
+            inputStream.read( new byte[8] );
+            return inputStream;
         }
 
 
