@@ -60,6 +60,12 @@ public class Info {
     @JsonProperty("InitSha1")
     private String initSha1;
 
+    @JsonProperty("SwapLimit")
+    private int swapLimit;
+
+    @JsonProperty("ExecutionDriver")
+    private String executionDriver;
+
     public boolean isDebug() {
         return debug;
     }
@@ -112,6 +118,14 @@ public class Info {
         return NGoroutines;
     }
 
+    public String getExecutionDriver() {
+        return executionDriver;
+    }
+
+    public int getSwapLimit() {
+        return swapLimit;
+    }
+
     public String getInitPath() {
         return initPath;
     }
@@ -138,6 +152,8 @@ public class Info {
                 .add("NGoroutines", NGoroutines)
                 .add("initPath", initPath)
                 .add("initSha1", initSha1)
+                .add("swapLimit", swapLimit)
+                .add("executionDriver", executionDriver)
                 .toString();
     }
 }
