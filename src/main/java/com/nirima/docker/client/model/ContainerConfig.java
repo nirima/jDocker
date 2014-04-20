@@ -27,6 +27,8 @@ public class ContainerConfig {
     @JsonProperty("AttachStderr") private boolean   attachStderr = false;
     @JsonProperty("Env")          private String[]  env;
     @JsonProperty("Cmd")          private String[]  cmd;
+
+    // Seems deprecated in later oocker APIs
     @JsonProperty("Dns")          private String[]  dns;
     @JsonProperty("Image")        private String    image;
     @JsonProperty("Volumes")      private Object    volumes;

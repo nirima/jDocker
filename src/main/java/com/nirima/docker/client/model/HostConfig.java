@@ -29,6 +29,21 @@ public class HostConfig {
     @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("PortBindings")   private Map<String, PortBinding[]> portBindings;
 
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+    @JsonProperty("Privileged")
+    private Boolean privileged;
+
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+    @JsonProperty("PublishAllPorts")
+    private Boolean publishAllPorts;
+
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+    @JsonProperty("Dns")
+    private String[] dns;
+
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+    @JsonProperty("VolumesFrom")
+    private String[] volumesFrom;
 
     public HostConfig() {
 
@@ -45,8 +60,6 @@ public class HostConfig {
     public void setPortBindings(Map<String, PortBinding[]> portBindings) {
         this.portBindings = portBindings;
     }
-
-
 
     public String[] getBinds() {
         return binds;
@@ -70,6 +83,38 @@ public class HostConfig {
 
     public void setLxcConf(LxcConf[] lxcConf) {
         this.lxcConf = lxcConf;
+    }
+
+    public Boolean getPrivileged() {
+        return privileged;
+    }
+
+    public void setPrivileged(Boolean privileged) {
+        this.privileged = privileged;
+    }
+
+    public Boolean getPublishAllPorts() {
+        return publishAllPorts;
+    }
+
+    public void setPublishAllPorts(Boolean publishAllPorts) {
+        this.publishAllPorts = publishAllPorts;
+    }
+
+    public String[] getDns() {
+        return dns;
+    }
+
+    public void setDns(String[] dns) {
+        this.dns = dns;
+    }
+
+    public String[] getVolumesFrom() {
+        return volumesFrom;
+    }
+
+    public void setVolumesFrom(String[] volumesFrom) {
+        this.volumesFrom = volumesFrom;
     }
 
     public class LxcConf {
