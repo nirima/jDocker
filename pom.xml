@@ -10,7 +10,7 @@
     <groupId>com.nirima.jdocker</groupId>
     <artifactId>jDocker</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.5</version>
+    <version>0.2.6-SNAPSHOT</version>
 
     <name>jDocker</name>
     <url>https://github.com/nirima/jDocker</url>
@@ -28,7 +28,7 @@
         <connection>scm:git:git@github.com:nirima/jDocker.git</connection>
         <url>scm:git:git@github.com:nirima/jDocker.git</url>
         <developerConnection>scm:git:git@github.com:nirima/jDocker.git</developerConnection>
-      <tag>jDocker-0.2.5</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <developers>
