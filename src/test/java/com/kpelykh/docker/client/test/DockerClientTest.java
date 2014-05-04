@@ -343,7 +343,7 @@ public class DockerClientTest extends Assert
         List filesystemDiff = dockerClient.container(container.getId()).getFilesystemChanges();
         LOG.info("Container DIFF: {}", filesystemDiff.toString());
 
-        assertThat(filesystemDiff.size(), equalTo(1));
+        assertThat(filesystemDiff.size(), greaterThan(1));
         FileChanges testChangeLog = selectUnique(filesystemDiff, hasField("path", equalTo("/test")));
 
         assertThat(testChangeLog, hasField("path", equalTo("/test")));
@@ -745,6 +745,7 @@ public class DockerClientTest extends Assert
         boolean success = false;
         String imageId = null;
         for(EventStreamItem item : response ) {
+            LOG.info("Response: {}", item.toString());
             if( item.getStream().contains("Successfully built")) {
                 success = true;
                 imageId = StringUtils.substringAfterLast(item.getStream(), "Successfully built ").trim();
