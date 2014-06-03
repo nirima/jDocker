@@ -219,9 +219,16 @@ Status Codes:
 500 – server error
 Get a tarball containing all images and tags in a repository
 */
+
+    /**
+     * Monitor Docker's events
+     * @param since timestamp used for polling
+     * @param until timestamp used for polling
+     * @return stream of events
+     */
     @GET
     @Path("/events")
-    Response events(@QueryParam("since") Long since);
+    Response events(@QueryParam("since") Long since, @QueryParam("since") Long until);
 
 
     /*
@@ -274,4 +281,11 @@ Example request
     @Path("/images/load")
     Void postTarball(byte[] data);
 
+    /**
+     * Ping the docker server.
+     * @since 1.11
+     */
+    @GET
+    @Path("/_ping")
+    String ping();
 }

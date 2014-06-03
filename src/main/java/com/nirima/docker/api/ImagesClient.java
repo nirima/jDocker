@@ -278,10 +278,18 @@ Status Codes:
 */
 
     //------------------------
+
+    /**
+     * Remove an image
+     * @param name
+     * @return
+     */
     @DELETE
     @Path("{name}")
     @Produces(MediaType.TEXT_PLAIN)
-    String removeImage(@PathParam("name")String name);
+    String removeImage(@PathParam("name")String name,
+                       @QueryParam("force") boolean force,
+                       @QueryParam("noprune") boolean noprune);
 
 
 
@@ -294,5 +302,15 @@ Status Codes:
     @Path("/search")
     List<SearchItem> searchForImage(@QueryParam("term")String term);
 
-
+    /**
+     * Build an image from Dockerfile via stdin
+     * @param inputStream a tar archive.
+     */
+    @POST
+    @Path("/build")
+    @Consumes("application/tar")
+    InputStream buildImageFromStream(InputStream inputStream,
+                                     @QueryParam("t") String repositoryName,
+                                     @QueryParam("q") boolean quiet,
+                                     @QueryParam("nocache") boolean nocache);
 }

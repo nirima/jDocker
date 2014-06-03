@@ -76,7 +76,7 @@ public class DockerClientTest extends Assert
         for (String image : tmpImgs) {
             LOG.info("Cleaning up temporary image " + image);
             try {
-                dockerClient.imagesApi().removeImage(image);
+                dockerClient.imagesApi().removeImage(image,false,false);
             } catch (Exception ignore) {}
         }
 

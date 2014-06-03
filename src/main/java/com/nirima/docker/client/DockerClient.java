@@ -1,18 +1,26 @@
 package com.nirima.docker.client;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.nirima.docker.client.model.*;
 import com.kpelykh.docker.client.utils.CompressArchiveUtil;
 import com.nirima.docker.api.ContainersClient;
 import com.nirima.docker.api.ImagesClient;
 import com.nirima.docker.api.MiscClient;
+import com.nirima.docker.client.model.ContainerConfig;
+import com.nirima.docker.client.model.ContainerCreateResponse;
+import com.nirima.docker.client.model.ContainerInspectResponse;
+import com.nirima.docker.client.model.EventStreamItem;
+import com.nirima.docker.client.model.FileChanges;
+import com.nirima.docker.client.model.HostConfig;
+import com.nirima.docker.client.model.ImageInspectResponse;
+import com.nirima.docker.client.model.Info;
+import com.nirima.docker.client.model.Version;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.slf4j.Logger;
@@ -40,30 +48,44 @@ public class DockerClient {
         return new Builder();
     }
 
-
-
     public static class Builder {
 
-        private String serverUrl;
+        private String       serverUrl;
+        private ClientConfig cc  = new ClientConfig();
+
+        Builder() {
+            // Set some reasonable defaults
+            cc.property(ClientProperties.CONNECT_TIMEOUT, 5000);
+            cc.property(ClientProperties.READ_TIMEOUT,    5000);
+        }
 
         public Builder withUrl(String url) {
             this.serverUrl = url;
             return this;
         }
 
+        public Builder connectTimeout(int ms) {
+            cc.property(ClientProperties.CONNECT_TIMEOUT, ms);
+            return this;
+        }
+
+        public Builder readTimeout(int ms) {
+            cc.property(ClientProperties.READ_TIMEOUT, ms);
+            return this;
+        }
+
         public DockerClient build() {
-            return new DockerClient(serverUrl);
+            return new DockerClient(serverUrl,cc);
         }
     }
 
     private final String serverUrl;
     private final WebTarget webTarget;
 
-    private DockerClient(String serverUrl)
+    private DockerClient(String serverUrl, ClientConfig cc)
     {
         this.serverUrl = serverUrl;
 
-        ClientConfig cc = new ClientConfig();
         LoggingFilter lf = new LoggingFilter(java.util.logging.Logger.getLogger(LoggingFilter.class.getName()), true);
 
         cc.register(lf);
@@ -265,7 +287,7 @@ public class DockerClient {
         }
 
         public void remove(boolean includingVolumes) {
-            containersApi().removeContainer(containerId, includingVolumes);
+            containersApi().removeContainer(containerId, includingVolumes, false);
         }
 
         public int waitForContainer() {
@@ -442,11 +464,11 @@ public class DockerClient {
         }
 
 
-        public void remove(List<String> images) throws DockerException {
+        public void remove(Collection<String> images) throws DockerException {
             Preconditions.checkNotNull(images, "List of images can't be null");
 
             for (String imageName : images) {
-                imagesApi().removeImage(imageName);
+                imagesApi().removeImage(imageName, false, false);
             }
         }
 
@@ -462,7 +484,7 @@ public class DockerClient {
 
         public void remove() {
             try {
-                imagesApi().removeImage(imageId);
+                imagesApi().removeImage(imageId, false, false);
             }
             catch(NotFoundException ex) {
                 log.warn("Remove Image {} not found", imageId);

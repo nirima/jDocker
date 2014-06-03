@@ -487,13 +487,22 @@ Status Codes:
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.TEXT_PLAIN)
-    String removeContainer(@PathParam("id")String id);
+    void removeContainer(@PathParam("id")String id);
 
+    /**
+     * Remove the container ID from the filesystem
+     * @param id
+     * @param removeVolumes Remove the volumes associated to the container
+     * @param force Removes the container
+    even if it was running.
+     * @return
+     */
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.TEXT_PLAIN)
-    String removeContainer(@PathParam("id")String id,
-                         @QueryParam("v")boolean removeVolumes);
+    void removeContainer(@PathParam("id")String id,
+                         @QueryParam("v")boolean removeVolumes,
+                         @QueryParam("force")boolean force);
 
 /*
 Copy files or folders from a container
@@ -523,4 +532,16 @@ Status Codes:
     @POST
     @Path("/{id}/copy")
     void copy(@PathParam("id")String id);
+
+    /**
+     * Get stdout and stderr logs from the container ID
+     */
+    @GET
+    @Path("/{id}/logs")
+    InputStream logs(@PathParam("id")String id,
+                @QueryParam("follow")boolean follow,
+                @QueryParam("stdout")boolean stdout,
+                @QueryParam("stderr")boolean stderr,
+                @QueryParam("timestamps")boolean timestamps
+                );
 }
