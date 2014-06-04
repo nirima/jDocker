@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by magnayn on 02/02/2014.
@@ -233,8 +234,10 @@ Status Codes:
     //------------------------
     @POST
     @Path("/{name}/push")
-    void pushImageOnRegistry(@PathParam("name")     String name,
-                             @QueryParam("registry")String registry);
+    @Consumes("text/plain")
+    InputStream pushImageOnRegistry(@PathParam("name")     String name,
+                                     @QueryParam("registry")String registry,
+                                     @QueryParam("tag")String tag);
 
 
     //------------------------
@@ -287,7 +290,7 @@ Status Codes:
     @DELETE
     @Path("{name}")
     @Produces(MediaType.TEXT_PLAIN)
-    String removeImage(@PathParam("name")String name,
+    List<Map<String, String>> removeImage(@PathParam("name")String name,
                        @QueryParam("force") boolean force,
                        @QueryParam("noprune") boolean noprune);
 

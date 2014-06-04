@@ -2,7 +2,9 @@ package com.nirima.docker.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.kpelykh.docker.client.utils.CompressArchiveUtil;
 import com.nirima.docker.api.ContainersClient;
@@ -14,27 +16,38 @@ import com.nirima.docker.client.model.ContainerInspectResponse;
 import com.nirima.docker.client.model.EventStreamItem;
 import com.nirima.docker.client.model.FileChanges;
 import com.nirima.docker.client.model.HostConfig;
+import com.nirima.docker.client.model.ImageAction;
 import com.nirima.docker.client.model.ImageInspectResponse;
 import com.nirima.docker.client.model.Info;
 import com.nirima.docker.client.model.Version;
+import com.nirima.docker.jersey.NullReader;
+import jersey.repackaged.com.google.common.collect.Iterators;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.message.internal.MessageBodyProviderNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -43,9 +56,18 @@ import java.util.UUID;
 public class DockerClient {
 
     private static final Logger log = LoggerFactory.getLogger(DockerClient.class);
+    private MultivaluedMap<String, Object> headers;
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public MultivaluedMap<String,Object> getHeaders() {
+        if( headers == null ) {
+            headers = new MultivaluedHashMap<String, Object>();
+            headers.putSingle("X-Registry-Auth","docker");
+        }
+        return headers;
     }
 
     public static class Builder {
@@ -57,6 +79,14 @@ public class DockerClient {
             // Set some reasonable defaults
             cc.property(ClientProperties.CONNECT_TIMEOUT, 5000);
             cc.property(ClientProperties.READ_TIMEOUT,    5000);
+
+
+            // Docker has an irritating habit of returning no data,
+            // but saying the content type is text/plain.
+
+            // MessageBodyReader not found for media type=text/plain; charset=utf-8, type=void, genericType=void
+
+            cc.register(NullReader.class);
         }
 
         public Builder withUrl(String url) {
@@ -95,7 +125,9 @@ public class DockerClient {
 
     // Remote APIs------------------------------------------------------------------
     public ImagesClient imagesApi() {
-        return WebResourceFactory.newResource(ImagesClient.class, webTarget);
+        return WebResourceFactory.newResource(ImagesClient.class, webTarget, false, getHeaders(),
+                Collections.<Cookie>emptyList(), new Form());
+
     }
 
     public ContainersClient containersApi() {
@@ -491,6 +523,43 @@ public class DockerClient {
             }
         }
 
+        public RemoveCommand removeCommand() {
+            return new RemoveCommand();
+        }
+
+        public class RemoveCommand {
+            boolean force = false;
+            boolean noprune = false;
+
+            public RemoveCommand force(boolean force) {
+                this.force = force;
+                return this;
+            }
+
+            public RemoveCommand noPrune(boolean noprune) {
+                this.noprune = noprune;
+                return this;
+            }
+
+            public Collection<ImageAction> execute() {
+                try {
+                    List<Map<String, String>> items = imagesApi().removeImage(imageId, force, noprune);
+                    return Collections2.transform(items, new Function<Map<String, String>, ImageAction>() {
+                        @Override
+                        public ImageAction apply(@Nullable Map<String, String> input) {
+
+                            Map.Entry<String, String> entry = Iterators.get(input.entrySet().iterator(), 0);
+                            return new ImageAction( ImageAction.ActionType.valueOf(entry.getKey()), entry.getValue());
+                        }
+                    });
+                }
+                catch(NotFoundException ex) {
+                    log.warn("Remove Image {} not found", imageId);
+                    return Collections.emptySet();
+                }
+            }
+        }
+
         public ImageInspectResponse inspect() {
             return imagesApi().inspectImage(imageId);
         }
@@ -500,7 +569,7 @@ public class DockerClient {
         }
 
         public void push(String registry) {
-            imagesApi().pushImageOnRegistry(imageId, registry);
+            imagesApi().pushImageOnRegistry(imageId, registry, "");
         }
     }
 
