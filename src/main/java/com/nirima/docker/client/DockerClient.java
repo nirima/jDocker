@@ -77,8 +77,8 @@ public class DockerClient {
 
         Builder() {
             // Set some reasonable defaults
-            cc.property(ClientProperties.CONNECT_TIMEOUT, 5000);
-            cc.property(ClientProperties.READ_TIMEOUT,    5000);
+            cc.property(ClientProperties.CONNECT_TIMEOUT, 10000);
+            cc.property(ClientProperties.READ_TIMEOUT,    10000);
 
 
             // Docker has an irritating habit of returning no data,
