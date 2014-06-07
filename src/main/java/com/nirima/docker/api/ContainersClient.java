@@ -495,7 +495,6 @@ Status Codes:
      * @param removeVolumes Remove the volumes associated to the container
      * @param force Removes the container
     even if it was running.
-     * @return
      */
     @DELETE
     @Path("/{id}")
