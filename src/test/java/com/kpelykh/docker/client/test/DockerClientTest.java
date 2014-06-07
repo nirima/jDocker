@@ -194,7 +194,16 @@ public class DockerClientTest extends Assert
 
         Container container2 = filteredContainers.get(0);
         assertThat(container2.getCommand(), not(isEmptyString()));
-        assertThat(container2.getImage(), equalTo("busybox:latest"));
+
+        // We want to check that it was busybox:latest - but it may have an arbitary other
+        // tag - for example, busybox:buildroot-2014.02
+        //
+        // So we check that those 2 IDs are the same.
+
+        ImageInspectResponse response = dockerClient.image("busybox:latest").inspect();
+        ImageInspectResponse response2 = dockerClient.image(container2.getImage()).inspect();
+
+        assertThat(response.getId(), is(equalTo(response2.getId())));
     }
 
 
@@ -495,7 +504,7 @@ public class DockerClientTest extends Assert
         info = dockerClient.system().info();
         LOG.info("Client info after pull, {}", info.toString());
 
-        assertThat(imgCount, lessThan(info.getImages()));
+        assertThat(imgCount, lessThanOrEqualTo(info.getImages()));
 
         ImageInspectResponse imageInspectResponse = dockerClient.image(testImage).inspect();
         LOG.info("Image Inspect: {}", imageInspectResponse.toString());

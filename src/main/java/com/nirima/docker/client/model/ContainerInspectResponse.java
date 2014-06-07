@@ -18,6 +18,9 @@ public class ContainerInspectResponse {
     @JsonProperty("Id")
     private String id;
 
+    @JsonProperty("ID")
+    private String _oldId;
+
     @JsonProperty("Created")
     private String created;
 
@@ -80,7 +83,7 @@ public class ContainerInspectResponse {
     }
 
     public String getId() {
-        return id;
+        return Objects.firstNonNull(id,_oldId);
     }
 
     public String getCreated() {
@@ -130,7 +133,7 @@ public class ContainerInspectResponse {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("id", id)
+                .add("id", getId())
                 .add("created", created)
                 .add("path", path)
                 .add("args", args)
