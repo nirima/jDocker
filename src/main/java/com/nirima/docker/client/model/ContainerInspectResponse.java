@@ -15,7 +15,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContainerInspectResponse {
 
-    @JsonProperty("ID")
+    @JsonProperty("Id")
     private String id;
 
     @JsonProperty("Created")
