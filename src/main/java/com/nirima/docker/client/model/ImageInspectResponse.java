@@ -13,30 +13,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ImageInspectResponse {
 
     @JsonProperty("id")
+    private String _id;
+
+    @JsonProperty("Id")
     private String id;
 
-    @JsonProperty("parent") private String parent;
+    @JsonProperty("Parent") private String parent;
 
-    @JsonProperty("created") private String created;
+    @JsonProperty("Created") private String created;
 
-    @JsonProperty("container") private String container;
+    @JsonProperty("Container") private String container;
 
-    @JsonProperty("container_config") private ContainerConfig containerConfig;
+    @JsonProperty("ContainerConfig") private ContainerConfig containerConfig;
 
     @JsonProperty("Size") private long size;
 
-    @JsonProperty("docker_version") private String dockerVersion;
+    @JsonProperty("DockerVersion") private String dockerVersion;
 
-    @JsonProperty("config") private ContainerConfig config;
+    @JsonProperty("Config") private ContainerConfig config;
 
-    @JsonProperty("architecture") private String arch;
+    @JsonProperty("Architecture") private String arch;
 
-    @JsonProperty("comment") private String comment;
+    @JsonProperty("Comment") private String comment;
 
-    @JsonProperty("author") private String author;
+    @JsonProperty("Author") private String author;
 
     public String getId() {
-        return id;
+        return Objects.firstNonNull(id, _id);
     }
 
     public String getParent() {
@@ -82,7 +85,7 @@ public class ImageInspectResponse {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("id", id)
+                .add("id", getId())
                 .add("parent", parent)
                 .add("created", created)
                 .add("container", container)

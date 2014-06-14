@@ -97,7 +97,8 @@ public class DockerClientTest extends Assert
 
     @Test
     public void testDockerVersion() throws DockerException {
-        Version version = dockerClient.miscApi().version();
+
+        Version version = dockerClient.system().version();
         LOG.info(version.toString());
 
         assertTrue(version.getGoVersion().length() > 0);
@@ -105,6 +106,10 @@ public class DockerClientTest extends Assert
 
         assertEquals(StringUtils.split(version.getVersion(), ".").length, 3);
 
+        int v[] = version.getVersionComponents();
+        if( v[0] < 1) {
+            fail("Testing against pre-1.0 docker.");
+        }
     }
 
     @Test
@@ -352,7 +357,8 @@ public class DockerClientTest extends Assert
         List filesystemDiff = dockerClient.container(container.getId()).getFilesystemChanges();
         LOG.info("Container DIFF: {}", filesystemDiff.toString());
 
-        assertThat(filesystemDiff.size(), greaterThan(1));
+        // Check there was at least one change (we touched /test above)
+        assertThat(filesystemDiff.size(), greaterThan(0));
         FileChanges testChangeLog = selectUnique(filesystemDiff, hasField("path", equalTo("/test")));
 
         assertThat(testChangeLog, hasField("path", equalTo("/test")));

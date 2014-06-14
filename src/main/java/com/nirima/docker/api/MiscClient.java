@@ -60,6 +60,8 @@ Check auth configuration
     InputStream build(@QueryParam("t")String repositoryNameAndTag,
                       @QueryParam("q")boolean supressVerboseOutput,
                       @QueryParam("nocache")boolean suppressCache,
+                      @QueryParam("rm")boolean removeIntermediateContainers,
+                      @QueryParam("forcerm")boolean alwaysRemoveIntermediateContainers,
                       InputStream content);
 
     /*

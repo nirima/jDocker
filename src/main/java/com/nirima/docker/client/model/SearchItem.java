@@ -18,8 +18,8 @@ public class SearchItem {
     @JsonProperty("is_official")
     private boolean isOfficial;
 
-    @JsonProperty("is_trusted")
-    private boolean isTrusted;
+    @JsonProperty("is_automated")
+    private boolean isAutomated;
 
     @JsonProperty("name")
     private String name;
@@ -35,8 +35,8 @@ public class SearchItem {
         return isOfficial;
     }
 
-    public boolean isTrusted() {
-        return isTrusted;
+    public boolean isAutomated() {
+        return isAutomated;
     }
 
     public String getName() {
@@ -52,7 +52,7 @@ public class SearchItem {
         return Objects.toStringHelper(this)
                 .add("starCount", starCount)
                 .add("isOfficial", isOfficial)
-                .add("isTrusted", isTrusted)
+                .add("isAutomated", isAutomated)
                 .add("name", name)
                 .add("description", description)
                 .toString();

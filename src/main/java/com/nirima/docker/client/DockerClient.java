@@ -213,7 +213,7 @@ public class DockerClient {
             }
 
             try {
-                return makeEventStream(miscApi().build(tag, false, false, FileUtils.openInputStream(dockerFolderTar)));
+                return makeEventStream(miscApi().build(tag, false, false,false,false, FileUtils.openInputStream(dockerFolderTar)));
             } catch (Exception e) {
                 throw new DockerException(e);
             } finally {

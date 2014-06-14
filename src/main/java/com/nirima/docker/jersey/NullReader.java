@@ -22,11 +22,6 @@ import java.lang.reflect.Type;
 @Singleton
 public class NullReader implements MessageBodyReader {
 
-    public NullReader() {
-        System.out.println("ASDF");
-    }
-
-
     @Override
     public boolean isReadable(Class type, Type genericType, Annotation[] annotations, MediaType mediaType) {
         return type.equals(void.class);
