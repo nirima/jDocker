@@ -22,6 +22,7 @@ import com.nirima.docker.client.model.ImageInspectResponse;
 import com.nirima.docker.client.model.Info;
 import com.nirima.docker.client.model.Version;
 import com.nirima.docker.jersey.NullReader;
+import com.nirima.jersey.filter.Slf4jLoggingFilter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
@@ -58,6 +59,10 @@ public class DockerClient {
     private static final Logger log = LoggerFactory.getLogger(DockerClient.class);
     private MultivaluedMap<String, Object> headers;
 
+    public enum Logging {
+        NONE, SLF4J, JUL
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -74,12 +79,14 @@ public class DockerClient {
 
         private String       serverUrl;
         private ClientConfig cc  = new ClientConfig();
+        private Logging      logging = Logging.NONE;
+
+
 
         Builder() {
             // Set some reasonable defaults
             cc.property(ClientProperties.CONNECT_TIMEOUT, 10000);
             cc.property(ClientProperties.READ_TIMEOUT,    10000);
-
 
             // Docker has an irritating habit of returning no data,
             // but saying the content type is text/plain.
@@ -87,9 +94,17 @@ public class DockerClient {
             // MessageBodyReader not found for media type=text/plain; charset=utf-8, type=void, genericType=void
 
             cc.register(NullReader.class);
+
+            if( logging == Logging.JUL ) {
+                LoggingFilter lf = new LoggingFilter(java.util.logging.Logger.getLogger(LoggingFilter.class.getName()), true);
+                cc.register(lf);
+            } else if( logging == Logging.SLF4J ) {
+                cc.register(Slf4jLoggingFilter.builder().build() );
+            }
         }
 
         public Builder withUrl(String url) {
+            Preconditions.checkNotNull(url);
             this.serverUrl = url;
             return this;
         }
@@ -103,8 +118,14 @@ public class DockerClient {
             cc.property(ClientProperties.READ_TIMEOUT, ms);
             return this;
         }
+        public Builder withLogging(Logging logging) {
+            Preconditions.checkNotNull(logging);
+            this.logging = logging;
+            return this;
+        }
 
         public DockerClient build() {
+            Preconditions.checkNotNull(serverUrl);
             return new DockerClient(serverUrl,cc);
         }
     }
@@ -116,9 +137,6 @@ public class DockerClient {
     {
         this.serverUrl = serverUrl;
 
-        LoggingFilter lf = new LoggingFilter(java.util.logging.Logger.getLogger(LoggingFilter.class.getName()), true);
-
-        cc.register(lf);
         this.webTarget = ClientBuilder.newClient(cc).target(serverUrl);
 
     }
