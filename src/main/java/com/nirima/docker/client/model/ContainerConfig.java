@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Map;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class ContainerConfig {
+public class ContainerConfig  implements Serializable {
 
     @JsonProperty("Hostname")     private String    hostName = "";
     @JsonProperty("PortSpecs")    private String[]  portSpecs;

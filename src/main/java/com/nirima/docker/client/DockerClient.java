@@ -44,6 +44,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -54,7 +55,7 @@ import java.util.UUID;
 /**
  * Created by magnayn on 02/02/2014.
  */
-public class DockerClient {
+public class DockerClient implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(DockerClient.class);
     private MultivaluedMap<String, Object> headers;
@@ -582,8 +583,8 @@ public class DockerClient {
             return imagesApi().inspectImage(imageId);
         }
 
-        public void tag(String name, boolean b) {
-            imagesApi().tagImage(imageId, name, b);
+        public void tag(String name, boolean force) {
+            imagesApi().tagImage(imageId, name, force);
         }
 
         public void push(String registry) {

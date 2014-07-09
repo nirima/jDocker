@@ -5,6 +5,7 @@ import com.google.common.base.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Arrays;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class Version {
+public class Version  implements Serializable {
 
     @JsonProperty("Version")
     private String version;

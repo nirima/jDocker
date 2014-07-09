@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
+import java.io.Serializable;
+
 /**
  * Created by magnayn on 09/02/2014.
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class EventStreamItem {
+public class EventStreamItem implements Serializable {
 
     @JsonProperty("stream")
     private String stream;

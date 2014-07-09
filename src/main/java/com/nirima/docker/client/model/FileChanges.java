@@ -3,10 +3,12 @@ package com.nirima.docker.client.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
+import java.io.Serializable;
+
 /**
  * Created by magnayn on 02/02/2014.
  */
-public class FileChanges {
+public class FileChanges implements Serializable {
     @JsonProperty("Path")
     private String path;
 

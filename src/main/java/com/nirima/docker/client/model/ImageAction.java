@@ -1,9 +1,11 @@
 package com.nirima.docker.client.model;
 
+import java.io.Serializable;
+
 /**
  * Actions (e.g: from 'remove an image' API)
  */
-public class ImageAction {
+public class ImageAction implements Serializable {
     public static enum ActionType {
         Untagged,
         Deleted

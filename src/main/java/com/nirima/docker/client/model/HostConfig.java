@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Map;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class HostConfig {
+public class HostConfig implements Serializable {
 
     @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("Binds")

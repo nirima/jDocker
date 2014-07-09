@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
+import java.io.Serializable;
+
 
 /**
  *
@@ -11,7 +13,7 @@ import com.google.common.base.Objects;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class ChangeLog {
+public class ChangeLog  implements Serializable {
 
     @JsonProperty("Path")
     private String path;

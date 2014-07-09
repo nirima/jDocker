@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.Map;
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonDeserialize(using=Ports.Deserializer.class)
-public class Ports {
+public class Ports  implements Serializable {
     private final Map<String, Port> ports = new HashMap<String, Port>();
     private Port[] mapping;
 
