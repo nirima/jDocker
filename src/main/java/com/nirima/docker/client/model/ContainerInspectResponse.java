@@ -5,6 +5,7 @@ import com.google.common.base.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -153,7 +154,7 @@ public class ContainerInspectResponse {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class NetworkSettings {
+    public class NetworkSettings implements Serializable {
 
         @JsonProperty("IPAddress") public String ipAddress;
         @JsonProperty("IPPrefixLen") public int ipPrefixLen;
@@ -176,7 +177,7 @@ public class ContainerInspectResponse {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public class ContainerState {
+    public class ContainerState implements Serializable {
 
         @JsonProperty("Running") public boolean running;
         @JsonProperty("Pid") public int pid;

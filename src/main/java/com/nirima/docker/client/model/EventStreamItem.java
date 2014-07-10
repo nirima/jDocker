@@ -35,7 +35,7 @@ public class EventStreamItem implements Serializable {
     }
 
     @JsonIgnoreProperties(ignoreUnknown=true)
-    public static class ErrorDetail {
+    public static class ErrorDetail implements Serializable {
         @JsonProperty("code")
         String code;
         @JsonProperty("message")
@@ -52,10 +52,6 @@ public class EventStreamItem implements Serializable {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .add("stream", stream)
-                .add("error", error)
-                .add("errorDetail", errorDetail)
-                .toString();
+        return Objects.firstNonNull(stream, error);
     }
 }

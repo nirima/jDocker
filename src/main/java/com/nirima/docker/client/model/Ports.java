@@ -56,7 +56,7 @@ public class Ports  implements Serializable {
     }
 
 
-    public static class Port{
+    public static class Port implements Serializable {
 
         private final String scheme;
         private final String port;

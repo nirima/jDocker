@@ -118,7 +118,7 @@ public class HostConfig implements Serializable {
         this.volumesFrom = volumesFrom;
     }
 
-    public class LxcConf {
+    public class LxcConf implements Serializable {
         @JsonProperty("Key")
         public String key;
 

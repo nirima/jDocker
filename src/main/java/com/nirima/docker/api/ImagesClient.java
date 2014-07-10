@@ -236,8 +236,8 @@ Status Codes:
     @Path("/{name}/push")
     @Consumes("text/plain")
     InputStream pushImageOnRegistry(@PathParam("name")     String name,
-                                     @QueryParam("registry")String registry,
-                                     @QueryParam("tag")String tag);
+                                     @QueryParam("registry")String registry
+                                     );
 
 
     //------------------------

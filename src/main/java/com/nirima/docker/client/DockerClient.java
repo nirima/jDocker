@@ -11,6 +11,8 @@ import com.kpelykh.docker.client.utils.CompressArchiveUtil;
 import com.nirima.docker.api.ContainersClient;
 import com.nirima.docker.api.ImagesClient;
 import com.nirima.docker.api.MiscClient;
+import com.nirima.docker.client.command.BuildCommandBuilder;
+import com.nirima.docker.client.command.PushCommandBuilder;
 import com.nirima.docker.client.model.ContainerConfig;
 import com.nirima.docker.client.model.ContainerCreateResponse;
 import com.nirima.docker.client.model.ContainerInspectResponse;
@@ -76,18 +78,52 @@ public class DockerClient implements Serializable {
         return headers;
     }
 
-    public static class Builder {
+    public static class Builder implements Serializable {
 
         private String       serverUrl;
-        private ClientConfig cc  = new ClientConfig();
         private Logging      logging = Logging.NONE;
+        private int connectTimeout = 10000;
+        private int readTimeout = 10000;
 
 
+        public Builder fromClient (DockerClient client) {
+            this.serverUrl = client.serverUrl;
+            connectTimeout = (Integer)client.webTarget.getConfiguration().getProperty(ClientProperties.CONNECT_TIMEOUT);
+            readTimeout = (Integer)client.webTarget.getConfiguration().getProperty(ClientProperties.CONNECT_TIMEOUT);
+            return this;
+        }
 
-        Builder() {
+        public Builder withUrl(String url) {
+            Preconditions.checkNotNull(url);
+            this.serverUrl = url;
+            return this;
+        }
+
+        public Builder connectTimeout(int ms) {
+            connectTimeout = ms;
+            return this;
+        }
+
+        public Builder readTimeout(int ms) {
+            readTimeout = ms;
+            return this;
+        }
+        public Builder withLogging(Logging logging) {
+            Preconditions.checkNotNull(logging);
+            this.logging = logging;
+            return this;
+        }
+
+        public DockerClient build() {
+            Preconditions.checkNotNull(serverUrl);
+            return new DockerClient(serverUrl, getClientConfig());
+        }
+
+        private ClientConfig getClientConfig() {
+            ClientConfig cc  = new ClientConfig();
             // Set some reasonable defaults
-            cc.property(ClientProperties.CONNECT_TIMEOUT, 10000);
-            cc.property(ClientProperties.READ_TIMEOUT,    10000);
+            cc.property(ClientProperties.CONNECT_TIMEOUT, connectTimeout);
+            cc.property(ClientProperties.READ_TIMEOUT,    readTimeout);
 
             // Docker has an irritating habit of returning no data,
             // but saying the content type is text/plain.
@@ -102,32 +138,7 @@ public class DockerClient implements Serializable {
             } else if( logging == Logging.SLF4J ) {
                 cc.register(Slf4jLoggingFilter.builder().build() );
             }
-        }
-
-        public Builder withUrl(String url) {
-            Preconditions.checkNotNull(url);
-            this.serverUrl = url;
-            return this;
-        }
-
-        public Builder connectTimeout(int ms) {
-            cc.property(ClientProperties.CONNECT_TIMEOUT, ms);
-            return this;
-        }
-
-        public Builder readTimeout(int ms) {
-            cc.property(ClientProperties.READ_TIMEOUT, ms);
-            return this;
-        }
-        public Builder withLogging(Logging logging) {
-            Preconditions.checkNotNull(logging);
-            this.logging = logging;
-            return this;
-        }
-
-        public DockerClient build() {
-            Preconditions.checkNotNull(serverUrl);
-            return new DockerClient(serverUrl,cc);
+            return cc;
         }
     }
 
@@ -170,6 +181,9 @@ public class DockerClient implements Serializable {
             return miscApi().version();
         }
 
+        /**
+         * @deprecated  Use BuildCommand
+         */
         public Collection<EventStreamItem> build(File dockerFolder, String tag) throws DockerException {
             Preconditions.checkNotNull(dockerFolder, "Folder is null");
             Preconditions.checkArgument(dockerFolder.exists(), "Folder %s doesn't exist", dockerFolder);
@@ -207,16 +221,19 @@ public class DockerClient implements Serializable {
                             throw new DockerException(String.format("Wrong format on line [%s]", cmd));
                         }
 
-                        File src = new File(addArgs[1]);
-                        if (!src.isAbsolute()) {
-                            src = new File(dockerFolder, addArgs[1]).getCanonicalFile();
-                        }
+                        File src = new File(dockerFolder, addArgs[1]);
 
                         if (!src.exists()) {
-                            throw new DockerException(String.format("Source file %s does not' exist", src));
+                            throw new DockerException(String.format("Source file %s does not' exist", src.getAbsolutePath()));
                         }
+                        if( !src.getCanonicalPath().startsWith( dockerFolder.getCanonicalPath() ) ) {
+                            throw new DockerException(String.format("All files must be relative to the docker file path %s (Not: %s", dockerFolder, src));
+                        }
+
                         if (src.isDirectory()) {
-                            FileUtils.copyDirectory(src, tmpDockerContextFolder);
+                            File target = new File(tmpDockerContextFolder, addArgs[1]);
+                            target.mkdirs();
+                            FileUtils.copyDirectory(src, target);
                         } else {
                             FileUtils.copyFileToDirectory(src, tmpDockerContextFolder);
                         }
@@ -305,7 +322,12 @@ public class DockerClient implements Serializable {
         return new PullCommandBuilder();
     }
 
+    public BuildCommandBuilder createBuildCommand() { return new BuildCommandBuilder(this); }
 
+
+    public PushCommandBuilder createPushCommand() {
+        return new PushCommandBuilder(this);
+    }
 
     // Container functions-----------------------------------------------------
     public class Container {
@@ -588,8 +610,9 @@ public class DockerClient implements Serializable {
         }
 
         public void push(String registry) {
-            imagesApi().pushImageOnRegistry(imageId, registry, "");
+            imagesApi().pushImageOnRegistry(imageId, registry);
         }
+
     }
 
     public Images images() { return new Images(); }

@@ -654,6 +654,12 @@ public class DockerClientTest extends Assert
         dockerfileBuild(baseDir, "Successfully executed testAddFolder.sh");
     }
 
+    @Test
+    public void testDockerBuilderAddFolder2() throws DockerException, IOException {
+        File baseDir = new File(Thread.currentThread().getContextClassLoader().getResource("testAddFolder2").getFile());
+        dockerfileBuild(baseDir, "Test.");
+    }
+
     /*
     @Test
 
@@ -761,7 +767,7 @@ public class DockerClientTest extends Assert
         String imageId = null;
         for(EventStreamItem item : response ) {
             LOG.info("Response: {}", item.toString());
-            if( item.getStream().contains("Successfully built")) {
+            if( item.getStream() != null && item.getStream().contains("Successfully built")) {
                 success = true;
                 imageId = StringUtils.substringAfterLast(item.getStream(), "Successfully built ").trim();
             }
@@ -798,5 +804,20 @@ public class DockerClientTest extends Assert
         }
 
         assertThat(logwriter2.toString(), endsWith(expectedText));
+    }
+
+    // Test that we can push images
+    @Test
+    public void testPush() {
+        List<Image> images = dockerClient.images().finder().allImages(true).list();
+        for( Image image : images ) {
+            System.out.println(image);
+        }
+
+        dockerClient.image("busybox").inspect();
+        dockerClient.image("busybox").tag("192.168.111.18:5000/atest",false);
+
+        dockerClient.image("192.168.111.18:5000/atest").push(null);
+
     }
 }
