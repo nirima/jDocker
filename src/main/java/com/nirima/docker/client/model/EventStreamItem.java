@@ -52,6 +52,10 @@ public class EventStreamItem implements Serializable {
 
     @Override
     public String toString() {
-        return Objects.firstNonNull(stream, error);
+        return Objects.toStringHelper(this)
+                .add("stream", stream)
+                .add("error", error)
+                .add("errorDetail", errorDetail)
+                .toString();
     }
 }

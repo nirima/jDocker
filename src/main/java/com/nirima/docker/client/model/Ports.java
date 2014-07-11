@@ -37,12 +37,6 @@ public class Ports  implements Serializable {
         ports.put(port.getPort(), port);
     }
 
-    private void addMapping(Port src, Port target) {
-        Port p = ports.get(src);
-        if (p==null) return;
-//        p.addMapping(target);
-    }
-
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
