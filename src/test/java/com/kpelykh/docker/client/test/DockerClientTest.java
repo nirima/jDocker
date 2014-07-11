@@ -660,6 +660,12 @@ public class DockerClientTest extends Assert
         dockerfileBuild(baseDir, "Test.");
     }
 
+    @Test
+    public void testDockerBuilderAddFolder3() throws DockerException, IOException {
+        File baseDir = new File(Thread.currentThread().getContextClassLoader().getResource("testAddFolder3").getFile());
+        dockerfileBuild(baseDir, "Test.");
+    }
+
     /*
     @Test
 
