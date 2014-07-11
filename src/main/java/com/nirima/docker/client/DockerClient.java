@@ -29,6 +29,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.RequestEntityProcessing;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.message.internal.MessageBodyProviderNotFoundException;
@@ -83,7 +84,7 @@ public class DockerClient implements Serializable {
         private String       serverUrl;
         private Logging      logging = Logging.NONE;
         private int connectTimeout = 10000;
-        private int readTimeout = 10000;
+        private int readTimeout = -1;
 
 
         public Builder fromClient (DockerClient client) {
@@ -123,8 +124,11 @@ public class DockerClient implements Serializable {
             ClientConfig cc  = new ClientConfig();
             // Set some reasonable defaults
             cc.property(ClientProperties.CONNECT_TIMEOUT, connectTimeout);
-            cc.property(ClientProperties.READ_TIMEOUT,    readTimeout);
+            if( readTimeout != -1 )
+                cc.property(ClientProperties.READ_TIMEOUT,    readTimeout);
 
+            cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
+            cc.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024*1024);
             // Docker has an irritating habit of returning no data,
             // but saying the content type is text/plain.
 
@@ -184,88 +188,14 @@ public class DockerClient implements Serializable {
         /**
          * @deprecated  Use BuildCommand
          */
-        public Collection<EventStreamItem> build(File dockerFolder, String tag) throws DockerException {
+        public Collection<EventStreamItem> build(File dockerFolder, String tag) throws DockerException, IOException {
             Preconditions.checkNotNull(dockerFolder, "Folder is null");
             Preconditions.checkArgument(dockerFolder.exists(), "Folder %s doesn't exist", dockerFolder);
             Preconditions.checkState(new File(dockerFolder, "Dockerfile").exists(), "Dockerfile doesn't exist in " + dockerFolder);
 
-            //We need to use Jersey HttpClient here, since ApacheHttpClient4 will not add boundary filed to
-            //Content-Type: multipart/form-data; boundary=Boundary_1_372491238_1372806136625
-
-
-            // ARCHIVE TAR
-            String archiveNameWithOutExtension = UUID.randomUUID().toString();
-
-            File dockerFolderTar = null;
-            File tmpDockerContextFolder = null;
-
-            try {
-                File dockerFile = new File(dockerFolder, "Dockerfile");
-                List<String> dockerFileContent = FileUtils.readLines(dockerFile);
-
-                if (dockerFileContent.size() <= 0) {
-                    throw new DockerException(String.format("Dockerfile %s is empty", dockerFile));
-                }
-
-                //Create tmp docker context folder
-                tmpDockerContextFolder = new File(FileUtils.getTempDirectoryPath(), "docker-java-build" + archiveNameWithOutExtension);
-
-                FileUtils.copyFileToDirectory(dockerFile, tmpDockerContextFolder);
-
-                for (String cmd : dockerFileContent) {
-                    String addArgs[] = StringUtils.split(cmd, " \t");
-
-                    if (addArgs.length > 0 && addArgs[0].equalsIgnoreCase("ADD")) {
-
-                        if (addArgs.length != 3) {
-                            throw new DockerException(String.format("Wrong format on line [%s]", cmd));
-                        }
-
-                        File src = new File(dockerFolder, addArgs[1]);
-
-                        if (!src.exists()) {
-                            throw new DockerException(String.format("Source file %s does not' exist", src.getAbsolutePath()));
-                        }
-                        if( !src.getCanonicalPath().startsWith( dockerFolder.getCanonicalPath() ) ) {
-                            throw new DockerException(String.format("All files must be relative to the docker file path %s (Not: %s", dockerFolder, src));
-                        }
-
-                        if (src.isDirectory()) {
-                            File target = new File(tmpDockerContextFolder, addArgs[1]);
-                            target.mkdirs();
-                            FileUtils.copyDirectory(src, target);
-                        } else {
-                            FileUtils.copyFileToDirectory(src, tmpDockerContextFolder);
-                        }
-                    }
-                }
-
-                dockerFolderTar = CompressArchiveUtil.archiveTARFiles(tmpDockerContextFolder, archiveNameWithOutExtension);
-
-            } catch (IOException ex) {
-                FileUtils.deleteQuietly(dockerFolderTar);
-                FileUtils.deleteQuietly(tmpDockerContextFolder);
-                throw new DockerException("Error occurred while preparing Docker context folder.", ex);
-            }
-
-            try {
-                return makeEventStream(miscApi().build(tag, false, false,false,false, FileUtils.openInputStream(dockerFolderTar)));
-            } catch (Exception e) {
-                throw new DockerException(e);
-            } finally {
-                FileUtils.deleteQuietly(dockerFolderTar);
-                FileUtils.deleteQuietly(tmpDockerContextFolder);
-            }
+            return createBuildCommand().dockerFile(new File(dockerFolder, "Dockerfile")).tag(tag).execute().getItems();
         }
-        private Collection<EventStreamItem> makeEventStream(InputStream inputStream) throws IOException {
-            ObjectMapper mapper = new ObjectMapper();
-            // we'll be reading instances of MyBean
-            ObjectReader reader = mapper.reader(EventStreamItem.class);
-            // and then do other configuration, if any, and read:
-            Iterator<EventStreamItem> items = reader.readValues(inputStream);
 
-            return ImmutableList.copyOf(items);
-        }
     }
 
     public System system() {
