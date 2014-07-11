@@ -15,9 +15,7 @@ public class CompressArchiveUtil {
 
 	public static File archiveTARFiles(File baseDir, String archiveNameWithOutExtension) throws IOException {
 
-		File tarFile = null;
-		
-        tarFile = new File(FileUtils.getTempDirectoryPath(), archiveNameWithOutExtension + ".tar");
+		File tarFile = new File(FileUtils.getTempDirectoryPath(), archiveNameWithOutExtension + ".tar");
 
         Collection<File> files =
                 FileUtils.listFiles(
