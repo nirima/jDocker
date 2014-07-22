@@ -35,6 +35,7 @@ import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.message.internal.MessageBodyProviderNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.util.logging.resources.logging;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
@@ -56,36 +57,19 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Created by magnayn on 02/02/2014.
+ * Top-level docker client interface.
  */
-public class DockerClient implements Serializable {
+public class DockerClient extends DockerClientBase implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(DockerClient.class);
-    private MultivaluedMap<String, Object> headers;
 
-    public enum Logging {
-        NONE, SLF4J, JUL
-    }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public MultivaluedMap<String,Object> getHeaders() {
-        if( headers == null ) {
-            headers = new MultivaluedHashMap<String, Object>();
-            headers.putSingle("X-Registry-Auth","docker");
-        }
-        return headers;
-    }
 
-    public static class Builder implements Serializable {
-
-        private String       serverUrl;
-        private Logging      logging = Logging.NONE;
-        private int connectTimeout = 10000;
-        private int readTimeout = -1;
-
+    public static class Builder extends DockerClientBase.Builder<Builder> {
 
         public Builder fromClient (DockerClient client) {
             this.serverUrl = client.serverUrl;
@@ -94,67 +78,14 @@ public class DockerClient implements Serializable {
             return this;
         }
 
-        public Builder withUrl(String url) {
-            Preconditions.checkNotNull(url);
-            this.serverUrl = url;
-            return this;
-        }
-
-        public Builder connectTimeout(int ms) {
-            connectTimeout = ms;
-            return this;
-        }
-
-        public Builder readTimeout(int ms) {
-            readTimeout = ms;
-            return this;
-        }
-        public Builder withLogging(Logging logging) {
-            Preconditions.checkNotNull(logging);
-            this.logging = logging;
-            return this;
-        }
-
         public DockerClient build() {
             Preconditions.checkNotNull(serverUrl);
             return new DockerClient(serverUrl, getClientConfig());
         }
-
-        private ClientConfig getClientConfig() {
-            ClientConfig cc  = new ClientConfig();
-            // Set some reasonable defaults
-            cc.property(ClientProperties.CONNECT_TIMEOUT, connectTimeout);
-            if( readTimeout != -1 )
-                cc.property(ClientProperties.READ_TIMEOUT,    readTimeout);
-
-            cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
-            cc.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024*1024);
-            // Docker has an irritating habit of returning no data,
-            // but saying the content type is text/plain.
-
-            // MessageBodyReader not found for media type=text/plain; charset=utf-8, type=void, genericType=void
-
-            cc.register(NullReader.class);
-
-            if( logging == Logging.JUL ) {
-                LoggingFilter lf = new LoggingFilter(java.util.logging.Logger.getLogger(LoggingFilter.class.getName()), true);
-                cc.register(lf);
-            } else if( logging == Logging.SLF4J ) {
-                cc.register(Slf4jLoggingFilter.builder().build() );
-            }
-            return cc;
-        }
     }
 
-    private final String serverUrl;
-    private final WebTarget webTarget;
-
-    private DockerClient(String serverUrl, ClientConfig cc)
-    {
-        this.serverUrl = serverUrl;
-
-        this.webTarget = ClientBuilder.newClient(cc).target(serverUrl);
-
+    public DockerClient(String serverUrl, ClientConfig clientConfig) {
+        super(serverUrl, clientConfig);
     }
 
     // Remote APIs------------------------------------------------------------------
