@@ -73,7 +73,7 @@ public class DockerRegistryClient extends DockerClientBase  implements Serializa
         }
 
         public Builder withUrl(URL url) {
-            this.serverUrl = url.getHost() + ":" + url.getPort();
+            this.serverUrl = "http://" + url.getHost() + ":" + url.getPort();
             return this;
         }
     }
