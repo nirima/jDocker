@@ -2,7 +2,7 @@
 
 Fluent Java API client for [Docker](http://docs.docker.io/ "Docker")
 
-Supports Docker Client API v1.8+, Docker Server version 0.8+
+Supports Docker Client API v1.8+, Docker Server version 1.0+
 
 ## Build with Maven
 
@@ -21,7 +21,7 @@ Changes are :
 
 ###### Prerequisites:
 
-* Java 1.7+
+* Java 1.6+
 * Maven 3.0.5
 * Docker daemon running
 
