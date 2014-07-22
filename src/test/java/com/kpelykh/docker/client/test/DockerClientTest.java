@@ -821,9 +821,12 @@ public class DockerClientTest extends Assert
         }
 
         dockerClient.image("busybox").inspect();
-        dockerClient.image("busybox").tag("192.168.111.18:5000/atest",false);
 
-        dockerClient.image("192.168.111.18:5000/atest").push(null);
+        String name = "192.168.111.18:5000/atest" + System.currentTimeMillis();
+
+        dockerClient.image("busybox").tag(name,false);
+
+        dockerClient.image(name).push(null);
 
     }
 }
