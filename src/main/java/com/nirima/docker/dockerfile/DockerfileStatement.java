@@ -1,5 +1,6 @@
 package com.nirima.docker.dockerfile;
 
+import com.google.common.base.Objects;
 import com.nirima.docker.client.DockerException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -30,6 +31,15 @@ public class DockerfileStatement {
         public String getDestination() {
             return StringUtils.split(statement, " \t")[2];
         }
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this)
+                    .add("statement", "ADD")
+                    .add("source", getSource())
+                    .add("destination", getDestination())
+                    .toString();
+        }
     }
 
     public static DockerfileStatement createFromLine(String cmd) {
@@ -45,5 +55,12 @@ public class DockerfileStatement {
         } else {
             return new DockerfileStatement(cmd);
         }
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("statement", statement)
+                .toString();
     }
 }
