@@ -22,10 +22,10 @@ public class Identifier {
 
     /**
      * Return an identifier that correctly splits up the repository and tag.
-     * There can be >1 ":"
-     * fred/jim     --> fred/jim, []
-     * fred/jim:123 --> fred/jim, 123
-     * fred:123/jim:123 --> fred:123/jim, 123
+     * There can be &gt; 1 ":"
+     * fred/jim     --&gt; fred/jim, []
+     * fred/jim:123 --&gt;  fred/jim, 123
+     * fred:123/jim:123 --&gt; fred:123/jim, 123
      *
      *
      * @param identifier
