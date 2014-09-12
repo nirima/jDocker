@@ -22,6 +22,8 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import static ch.lambdaj.Lambda.filter;
 import static ch.lambdaj.Lambda.selectUnique;
@@ -702,67 +704,37 @@ public class DockerClientTest extends Assert
         containerConfig.setImage(imageInspectResponse.getId());
         ContainerCreateResponse container = dockerClient.containers().create(containerConfig);
         assertThat(container.getId(), not(isEmptyString()));
-        dockerClient.container(container.getId()).start(); 
-        tmpContainers.add(container.getId());
 
-        ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
 
-        assertThat(containerInspectResponse.getId(), notNullValue());
-        assertThat(containerInspectResponse.getNetworkSettings().ports, notNullValue());
+        Map<String, PortBinding[]> bports = new HashMap<String, PortBinding[]>();
+        PortBinding binding = new PortBinding();
+        binding.hostIp = "0.0.0.0";
+        bports.put("6900/tcp", new PortBinding[] { binding });
+        HostConfig hostConfig = new HostConfig();
+        hostConfig.setPortBindings(bports);
 
-        //No use as such if not running on the server
-        for(String portstr : containerInspectResponse.getNetworkSettings().ports.getAllPorts().keySet()){
+        dockerClient.container(container.getId()).start(hostConfig); 
 
-         Ports.Port p = containerInspectResponse.getNetworkSettings().ports.getAllPorts().get(portstr);
-         int port = Integer.valueOf(p.getHostPort());
-        LOG.info("Checking port {} is open", port);
-        assertThat(available(port), is(false));
+        try {
+            tmpContainers.add(container.getId());
+
+            ContainerInspectResponse containerInspectResponse = dockerClient.container(container.getId()).inspect();
+
+            assertThat(containerInspectResponse.getId(), notNullValue());
+            assertThat(containerInspectResponse.getNetworkSettings().ports, notNullValue());
+            LOG.info("Ports: {}", containerInspectResponse.getNetworkSettings().ports.getAllPorts());
+            assertEquals(containerInspectResponse.getNetworkSettings().ports.getAllPorts().size(), 1);
+
+            Ports.Port p = containerInspectResponse.getNetworkSettings().ports.getAllPorts().get("6900");
+            assertThat( p, notNullValue());
+            assertThat( p.getHostPort(), notNullValue());
+        } finally {
+          dockerClient.container(container.getId()).stop(0);
         }
-
-
-        dockerClient.container(container.getId()).stop(0);
-
-
     }
 
 
     // UTIL
-
-    /**
-     * Checks to see if a specific port is available.
-     *
-     * @param port the port to check for availability
-     */
-    public static boolean available(int port) {
-        if (port < 1100 || port > 60000) {
-            throw new IllegalArgumentException("Invalid start port: " + port);
-        }
-
-        ServerSocket ss = null;
-        DatagramSocket ds = null;
-        try {
-            ss = new ServerSocket(port);
-            ss.setReuseAddress(true);
-            ds = new DatagramSocket(port);
-            ds.setReuseAddress(true);
-            return true;
-        } catch (IOException e) {
-        } finally {
-            if (ds != null) {
-                ds.close();
-            }
-
-            if (ss != null) {
-                try {
-                    ss.close();
-                } catch (IOException e) {
-                /* should not be thrown */
-                }
-            }
-        }
-
-        return false;
-    }
 
     private void dockerfileBuild(File baseDir, String expectedText) throws DockerException, IOException {
 

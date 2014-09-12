@@ -76,8 +76,10 @@ public abstract class DockerClientBase {
             if( readTimeout != -1 )
                 cc.property(ClientProperties.READ_TIMEOUT,    readTimeout);
 
-            cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
-            cc.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024*1024);
+            //There is a bug in docker 1.2 where the body of chunked message is ignored on some commands.
+            cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.BUFFERED);
+            //cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
+            //cc.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024*1024);
             // Docker has an irritating habit of returning no data,
             // but saying the content type is text/plain.
 
