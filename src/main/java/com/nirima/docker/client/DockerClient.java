@@ -19,6 +19,7 @@ import com.nirima.docker.client.model.ContainerInspectResponse;
 import com.nirima.docker.client.model.EventStreamItem;
 import com.nirima.docker.client.model.FileChanges;
 import com.nirima.docker.client.model.HostConfig;
+import com.nirima.docker.client.model.Identifier;
 import com.nirima.docker.client.model.ImageAction;
 import com.nirima.docker.client.model.ImageInspectResponse;
 import com.nirima.docker.client.model.Info;
@@ -146,6 +147,12 @@ public class DockerClient extends DockerClientBase implements Serializable {
 
         public PullCommandBuilder image(String image) {
             this.fromImage = image;
+            return this;
+        }
+
+        public PullCommandBuilder image(Identifier identifier) {
+            repo = identifier.repository.name;
+            tag  = identifier.tag.orNull();
             return this;
         }
 
