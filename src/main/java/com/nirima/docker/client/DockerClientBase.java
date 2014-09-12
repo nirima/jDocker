@@ -21,12 +21,14 @@ public abstract class DockerClientBase {
     protected MultivaluedMap<String, Object> headers;
     protected final String serverUrl;
     protected final WebTarget webTarget;
+    protected final WebTarget webTargetChunked;
 
-    protected DockerClientBase(String serverUrl, ClientConfig cc)
+    protected DockerClientBase(String serverUrl, ClientConfig cc, ClientConfig ccChunked)
     {
         this.serverUrl = serverUrl;
 
-        this.webTarget = ClientBuilder.newClient(cc).target(serverUrl);
+        this.webTarget        = ClientBuilder.newClient(cc).target(serverUrl);
+        this.webTargetChunked = ClientBuilder.newClient(ccChunked).target(serverUrl);
     }
 
     public enum Logging {
@@ -69,31 +71,55 @@ public abstract class DockerClientBase {
             return (T)this;
         }
 
-        protected ClientConfig getClientConfig() {
+        /**
+         * Create a basic client config, not setting the processing type.
+         * @return a ClientConfig that is mostly configured.
+         */
+        private ClientConfig createBaseClientConfig() {
             ClientConfig cc  = new ClientConfig();
             // Set some reasonable defaults
             cc.property(ClientProperties.CONNECT_TIMEOUT, connectTimeout);
             if( readTimeout != -1 )
                 cc.property(ClientProperties.READ_TIMEOUT,    readTimeout);
 
-            //There is a bug in docker 1.2 where the body of chunked message is ignored on some commands.
-            cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.BUFFERED);
-            //cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
-            //cc.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024*1024);
             // Docker has an irritating habit of returning no data,
             // but saying the content type is text/plain.
 
             // MessageBodyReader not found for media type=text/plain; charset=utf-8, type=void, genericType=void
-
             cc.register(NullReader.class);
 
+            registerLogging(cc);
+
+            return cc;
+        }
+
+        protected ClientConfig getClientConfig() {
+            ClientConfig cc  = createBaseClientConfig();
+
+            //There is a bug in docker 1.2 where the body of chunked message is ignored on some commands.
+            cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.BUFFERED);
+
+            return cc;
+        }
+
+        protected ClientConfig getClientConfigChunked() {
+            ClientConfig cc  = createBaseClientConfig();
+
+            // Chunked encoding - need this, particularly if we're uploading data otherwise we'll
+            // rapidly run out of memory.
+            cc.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
+            cc.property(ClientProperties.CHUNKED_ENCODING_SIZE, 1024*1024);
+
+            return cc;
+        }
+
+        private void registerLogging(ClientConfig cc) {
             if( logging == Logging.JUL ) {
                 LoggingFilter lf = new LoggingFilter(java.util.logging.Logger.getLogger(LoggingFilter.class.getName()), true);
                 cc.register(lf);
             } else if( logging == Logging.SLF4J ) {
                 cc.register(Slf4jLoggingFilter.builder().build() );
             }
-            return cc;
         }
     }
 

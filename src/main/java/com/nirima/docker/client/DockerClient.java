@@ -1,13 +1,9 @@
 package com.nirima.docker.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
-import com.kpelykh.docker.client.utils.CompressArchiveUtil;
 import com.nirima.docker.api.ContainersClient;
 import com.nirima.docker.api.ImagesClient;
 import com.nirima.docker.api.MiscClient;
@@ -24,38 +20,24 @@ import com.nirima.docker.client.model.ImageAction;
 import com.nirima.docker.client.model.ImageInspectResponse;
 import com.nirima.docker.client.model.Info;
 import com.nirima.docker.client.model.Version;
-import com.nirima.docker.jersey.NullReader;
-import com.nirima.jersey.filter.Slf4jLoggingFilter;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.RequestEntityProcessing;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
-import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.message.internal.MessageBodyProviderNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.util.logging.resources.logging;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Top-level docker client interface.
@@ -64,11 +46,9 @@ public class DockerClient extends DockerClientBase implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(DockerClient.class);
 
-
     public static Builder builder() {
         return new Builder();
     }
-
 
     public static class Builder extends DockerClientBase.Builder<Builder> {
 
@@ -81,12 +61,12 @@ public class DockerClient extends DockerClientBase implements Serializable {
 
         public DockerClient build() {
             Preconditions.checkNotNull(serverUrl);
-            return new DockerClient(serverUrl, getClientConfig());
+            return new DockerClient(serverUrl, getClientConfig(), getClientConfigChunked());
         }
     }
 
-    public DockerClient(String serverUrl, ClientConfig clientConfig) {
-        super(serverUrl, clientConfig);
+    public DockerClient(String serverUrl, ClientConfig clientConfig, ClientConfig clientConfigChunked) {
+        super(serverUrl, clientConfig, clientConfigChunked);
     }
 
     // Remote APIs------------------------------------------------------------------
@@ -101,7 +81,7 @@ public class DockerClient extends DockerClientBase implements Serializable {
     }
 
     public MiscClient miscApi() {
-        return WebResourceFactory.newResource(MiscClient.class, webTarget);
+        return WebResourceFactory.newResource(MiscClient.class, webTargetChunked);
     }
 
     // Useful wrapper functions-----------------------------------------------------

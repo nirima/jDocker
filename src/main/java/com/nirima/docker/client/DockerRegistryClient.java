@@ -69,7 +69,7 @@ public class DockerRegistryClient extends DockerClientBase  implements Serializa
 
         public DockerRegistryClient build() {
             Preconditions.checkNotNull(serverUrl);
-            return new DockerRegistryClient(serverUrl, getClientConfig());
+            return new DockerRegistryClient(serverUrl, getClientConfig(), getClientConfigChunked());
         }
 
         public Builder withUrl(URL url) {
@@ -78,9 +78,9 @@ public class DockerRegistryClient extends DockerClientBase  implements Serializa
         }
     }
 
-    private DockerRegistryClient(String serverUrl, ClientConfig cc)
+    private DockerRegistryClient(String serverUrl, ClientConfig cc, ClientConfig ccChunked)
     {
-        super(serverUrl, cc);
+        super(serverUrl, cc, ccChunked);
 
     }
 
