@@ -3,8 +3,15 @@ package com.nirima.docker.client.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Objects;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.jvnet.hk2.component.MultiMap;
 
 import java.io.Serializable;
+import java.util.Collection;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -60,6 +67,25 @@ public class HostConfig implements Serializable {
 
     public void setPortBindings(Map<String, PortBinding[]> portBindings) {
         this.portBindings = portBindings;
+    }
+
+    /**
+     * Set up some port mappings
+     * **/
+    public void setPortBindings(Iterable<PortMapping> portMappingCollection) {
+
+        Multimap<String, PortBinding> bindings = ArrayListMultimap.create();
+
+        for(PortMapping portMapping : portMappingCollection) {
+            bindings.put(portMapping.getContainerPortString(), portMapping.getHostPortBinding());
+        }
+
+        Map<String, PortBinding[]> values = new HashMap<String, PortBinding[]>();
+        for( String key : bindings.keySet() ) {
+            values.put(key,  bindings.get(key).toArray(new PortBinding[1]));
+        }
+        setPortBindings(values);
+
     }
 
     public String[] getBinds() {
@@ -141,5 +167,19 @@ public class HostConfig implements Serializable {
             this.value = value;
         }
 
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("binds", binds)
+                .add("containerIDFile", containerIDFile)
+                .add("lxcConf", lxcConf)
+                .add("portBindings", portBindings)
+                .add("privileged", privileged)
+                .add("publishAllPorts", publishAllPorts)
+                .add("dns", dns)
+                .add("volumesFrom", volumesFrom)
+                .toString();
     }
 }
