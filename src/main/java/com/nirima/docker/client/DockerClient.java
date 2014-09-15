@@ -131,7 +131,7 @@ public class DockerClient extends DockerClientBase implements Serializable {
         }
 
         public PullCommandBuilder image(Identifier identifier) {
-            repo = identifier.repository.name;
+            fromImage = identifier.repository.name;
             tag  = identifier.tag.orNull();
             return this;
         }
