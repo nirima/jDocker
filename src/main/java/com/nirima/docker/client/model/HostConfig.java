@@ -31,6 +31,10 @@ public class HostConfig implements Serializable {
     private String containerIDFile;
 
     @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+    @JsonProperty("Links")
+    private String[] links;
+
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("LxcConf")
     private LxcConf[] lxcConf;
 
@@ -94,6 +98,14 @@ public class HostConfig implements Serializable {
 
     public void setBinds(String[] binds) {
         this.binds = binds;
+    }
+
+    public String[] getLinks() {
+        return links;
+    }
+
+    public void setLinks(String[] links) {
+        this.links = links;
     }
 
     public String getContainerIDFile() {

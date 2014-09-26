@@ -28,6 +28,9 @@ public class BuildCommandBuilder {
     private File tarFile;
     private String tag;
 
+    private boolean suppressCache = false;
+    private boolean removeIntermediateContainers = false;
+
     public BuildCommandBuilder(DockerClient client) {
         this.client = client;
     }
@@ -49,6 +52,16 @@ public class BuildCommandBuilder {
         return this;
     }
 
+    public BuildCommandBuilder noCache() {
+        suppressCache = true;
+        return this;
+    }
+
+    public BuildCommandBuilder removeIntermediateContainers() {
+        removeIntermediateContainers = true;
+        return this;
+    }
+
     public BuildCommandResponse execute() throws IOException {
 
         boolean delete = false;
@@ -61,7 +74,7 @@ public class BuildCommandBuilder {
         InputStream results;
         FileInputStream tarInputStream = new FileInputStream(tarFile);
         try {
-            results = client.miscApi().build(tag, false, false, false, false, tarInputStream);
+            results = client.miscApi().build(tag, false, suppressCache, removeIntermediateContainers, false, tarInputStream);
         } finally {
             tarInputStream.close();
 
