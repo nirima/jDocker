@@ -2,7 +2,6 @@ package com.nirima.docker.client.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import com.google.common.base.Objects;
 
@@ -31,12 +30,8 @@ public class ContainerConfig  implements Serializable {
     @JsonProperty("AttachStderr") private boolean   attachStderr = false;
     @JsonProperty("Env")          private String[]  env;
     @JsonProperty("Cmd")          private String[]  cmd;
-
-    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("HostConfig")
     private HostConfig hostConfig;
-    //@JsonProperty("HostConfig")   private HostConfig hostConfig;
-
     // Seems deprecated in later oocker APIs
     @JsonProperty("Dns")          private String[]  dns;
     @JsonProperty("Image")        private String    image;
