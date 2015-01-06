@@ -2,6 +2,7 @@ package com.nirima.docker.client.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.google.common.base.Objects;
 
 import java.io.Serializable;
@@ -29,7 +30,8 @@ public class ContainerConfig  implements Serializable {
     @JsonProperty("AttachStderr") private boolean   attachStderr = false;
     @JsonProperty("Env")          private String[]  env;
     @JsonProperty("Cmd")          private String[]  cmd;
-
+    @JsonProperty("HostConfig")
+    private HostConfig hostConfig;
     // Seems deprecated in later oocker APIs
     @JsonProperty("Dns")          private String[]  dns;
     @JsonProperty("Image")        private String    image;
@@ -44,6 +46,14 @@ public class ContainerConfig  implements Serializable {
     @JsonProperty("ExposedPorts")   private Map<String, ?> exposedPorts;
     
     @JsonProperty("OnBuild")   private int[] onBuild;
+
+    public HostConfig getHostConfig() {
+        return hostConfig;
+    }
+    public ContainerConfig setHostConfig(HostConfig hostConfig) {
+        this.hostConfig = hostConfig;
+        return this;
+    }
 
     public Map<String, ?> getExposedPorts() {
         return exposedPorts;
@@ -321,6 +331,7 @@ public class ContainerConfig  implements Serializable {
                 .add("domainName", domainName)
                 .add("exposedPorts", exposedPorts)
                 .add("onBuild", onBuild)
+                .add("hostConfig", hostConfig)
                 .toString();
     }
 }

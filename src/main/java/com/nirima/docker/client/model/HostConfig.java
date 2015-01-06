@@ -2,6 +2,7 @@ package com.nirima.docker.client.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Objects;
 import com.google.common.collect.ArrayListMultimap;
@@ -76,6 +77,7 @@ public class HostConfig implements Serializable {
     /**
      * Set up some port mappings
      * **/
+    @JsonIgnore
     public void setPortBindings(Iterable<PortMapping> portMappingCollection) {
 
         Multimap<String, PortBinding> bindings = ArrayListMultimap.create();
