@@ -29,6 +29,7 @@ public class ContainerConfig  implements Serializable {
     @JsonProperty("AttachStderr") private boolean   attachStderr = false;
     @JsonProperty("Env")          private String[]  env;
     @JsonProperty("Cmd")          private String[]  cmd;
+    @JsonProperty("ExtraHosts")   private String[]  extraHosts;
 
     // Seems deprecated in later oocker APIs
     @JsonProperty("Dns")          private String[]  dns;
@@ -227,6 +228,16 @@ public class ContainerConfig  implements Serializable {
         return this;
      }
 
+    public String[] getExtraHosts() {
+        return extraHosts;
+    }
+
+    public ContainerConfig setExtraHosts(String[] extraHosts) {
+        this.extraHosts = extraHosts;
+
+        return this;
+    }
+
     public String[] getDns() {
         return dns;
     }
@@ -310,6 +321,7 @@ public class ContainerConfig  implements Serializable {
                 .add("attachStderr", attachStderr)
                 .add("env", env)
                 .add("cmd", cmd)
+                .add("extraHosts", extraHosts)
                 .add("dns", dns)
                 .add("image", image)
                 .add("volumes", volumes)
