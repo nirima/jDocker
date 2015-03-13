@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,6 +22,7 @@ import java.util.Map;
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class HostConfig implements Serializable {
+    private static final Logger LOGGER = Logger.getLogger("freddy");
 
     @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("Binds")
@@ -56,6 +58,10 @@ public class HostConfig implements Serializable {
     @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
     @JsonProperty("VolumesFrom")
     private String[] volumesFrom;
+
+    @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+    @JsonProperty("ExtraHosts")
+    private String[] extraHosts;
 
     public HostConfig() {
 
@@ -156,6 +162,20 @@ public class HostConfig implements Serializable {
         this.volumesFrom = volumesFrom;
     }
 
+    public String[] getExtraHosts() {
+        return extraHosts;
+    }
+
+    public void setExtraHosts(String[] extraHosts) {
+	try{
+	    LOGGER.info("gonna try to set.");
+            this.extraHosts = extraHosts;
+        }catch(Exception e){
+	    LOGGER.info("failed to set wtf");
+	    LOGGER.info(e.getMessage());
+	}
+    }
+
     public class LxcConf implements Serializable {
         @JsonProperty("Key")
         public String key;
@@ -190,6 +210,7 @@ public class HostConfig implements Serializable {
                 .add("portBindings", portBindings)
                 .add("privileged", privileged)
                 .add("publishAllPorts", publishAllPorts)
+		.add("extraHosts", extraHosts)
                 .add("dns", dns)
                 .add("volumesFrom", volumesFrom)
                 .toString();
